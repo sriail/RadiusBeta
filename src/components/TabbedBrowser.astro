@@ -1,0 +1,78 @@
+---
+import { Icon } from "astro-icon/components";
+const link = Astro.url.searchParams.get("redir");
+---
+
+<div id="tabbed-browser" class="h-full w-full flex flex-col bg-(--background)">
+    <!-- Tab Bar -->
+    <div id="tab-bar" class="flex items-center bg-(--background) border-b border-(--border) h-10 px-1 overflow-x-auto">
+        <div id="tabs-container" class="flex-1 flex items-center h-full overflow-x-auto" style="scrollbar-width: none;">
+            <!-- Tabs will be inserted here dynamically -->
+        </div>
+        <button id="add-tab-btn" class="flex-shrink-0 flex items-center justify-center w-8 h-8 min-w-[32px] rounded-full hover:bg-(--muted) ml-1 transition-colors" title="New tab">
+            <Icon name="material-symbols:add" class="w-4 h-4" />
+        </button>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div id="nav-bar" class="flex items-center px-4 py-2 bg-(--background) border-b border-(--border)">
+        <!-- Navigation Controls -->
+        <div class="flex items-center mr-3 space-x-1">
+            <button id="nav-back" class="p-1.5 rounded-full hover:bg-(--muted) transition-colors" title="Go back">
+                <Icon name="material-symbols:chevron-left" class="w-5 h-5" />
+            </button>
+            <button id="nav-forward" class="p-1.5 rounded-full hover:bg-(--muted) transition-colors" title="Go forward">
+                <Icon name="material-symbols:chevron-right" class="w-5 h-5" />
+            </button>
+            <button id="nav-refresh" class="p-1.5 rounded-full hover:bg-(--muted) transition-colors" title="Reload">
+                <Icon name="material-symbols:refresh" class="w-5 h-5" />
+            </button>
+        </div>
+
+        <!-- URL Bar -->
+        <div class="flex-1 relative group mx-2">
+            <div class="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 pointer-events-none opacity-50">
+                <Icon name="material-symbols:search" class="w-4 h-4" />
+            </div>
+            <input 
+                id="url-input" 
+                type="text" 
+                placeholder="Search or enter website address"
+                class="w-full rounded-full bg-(--muted) hover:bg-(--accent) focus:bg-(--card) pl-9 pr-4 h-9 transition-all border border-transparent focus:border-(--primary) focus:outline-none"
+            />
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center ml-3 space-x-1">
+            <button id="nav-bookmark" class="p-1.5 rounded-full hover:bg-(--muted) transition-colors" title="Add bookmark">
+                <Icon name="material-symbols:bookmark-outline" class="w-5 h-5" />
+            </button>
+            <button id="nav-fullscreen" class="p-1.5 rounded-full hover:bg-(--muted) transition-colors" title="Fullscreen">
+                <Icon name="material-symbols:fullscreen" class="w-5 h-5" />
+            </button>
+            <button id="nav-settings" class="p-1.5 rounded-full hover:bg-(--muted) transition-colors" title="Settings">
+                <Icon name="material-symbols:settings-outline" class="w-5 h-5" />
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab Content Area -->
+    <div id="tab-content-area" class="flex-1 relative bg-(--background) overflow-hidden">
+        <!-- Tab contents will be inserted here dynamically -->
+    </div>
+</div>
+
+<link-element data-link={link} />
+
+<script>
+    import { TabManager } from "@utils/tabManager.ts";
+    
+    document.addEventListener("astro:page-load", async () => {
+        try {
+            const tabManager = new TabManager();
+            await tabManager.init();
+        } catch (err) {
+            console.error("TabManager initialization error:", err);
+        }
+    });
+</script>
