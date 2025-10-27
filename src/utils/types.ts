@@ -12,9 +12,12 @@ type DropdownOptions = {
 };
 
 const SearchEngines: Record<string, string> = {
+    Bing: "https://bing.com/search?q=%s",
+    Brave: "https://search.brave.com/search?q=%s",
     DuckDuckGo: "https://duckduckgo.com/?q=%s",
     Google: "https://google.com/search?q=%s",
-    Bing: "https://bing.com/search?q=%s"
+    Yahoo: "https://search.yahoo.com/search?p=%s",
+    Quant: "https://www.qwant.com/?q=%s"
 };
 
 export { type SettingsProps, type DropdownOptions, SearchEngines };
