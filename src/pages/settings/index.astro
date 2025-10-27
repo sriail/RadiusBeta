@@ -33,6 +33,21 @@ Object.keys(SearchEngines).forEach((k) =>
             <p> Search Engine </p>
             <Dropdown id="sSwitcher" options={SearchEngineOptions} />
         </div>
+        
+        <!-- NEW: Tab Settings Section -->
+        <div class="mt-6 pt-6 border-t border-(--border)">
+            <h2 class="text-2xl font-semibold mb-4">Tab Settings</h2>
+            <div class="mt-2">
+                <p> Allow Tab Reordering <span class="text-xs opacity-60">(Experimental)</span></p>
+                <Dropdown id="tabReorder" options={
+                    [
+                        { name: 'Enabled', value: 'true' },
+                        { name: 'Disabled', value: 'false', default: true }
+                    ]
+                } />
+            </div>
+        </div>
+        
         <div class="mt-2 w-80">
             <div>
                 <p> Wisp Server </p>
@@ -91,7 +106,16 @@ Object.keys(SearchEngines).forEach((k) =>
         seEl.addEventListener("change", async () => {
             opts.settings.searchEngine(seEl.value);
         });
-    } 
+    }
+    
+    // NEW: Tab reordering setting
+    const tabReordering = async (opts: Options) => {
+        const tabReorderEl = document.getElementById("dropdownBox-tabReorder") as HTMLSelectElement;
+        tabReorderEl.value = opts.storageManager.getVal("allowTabReordering") || "false";
+        tabReorderEl.addEventListener("change", async () => {
+            opts.storageManager.setVal("allowTabReordering", tabReorderEl.value);
+        });
+    }
 
     const wispServer = async (opts: Options) => {
         const wispServerSwitcher = document.getElementById("wispServerSwitcher") as HTMLInputElement;
@@ -140,16 +164,13 @@ Object.keys(SearchEngines).forEach((k) =>
                 wispServerInfoInner.classList.add("text-red-500");
             }
             else {
-                //TODO: we need to actually check if the wisp server exists. But for now, this will work
                 reset(false);
                 wispServerInfoInner.innerText = "Wisp Server Set!";
                 wispServerInfoInner.classList.add("text-green-500");
-                //adBlocking.classList.contains("hidden") ? "" : adBlocking.classList.add("hidden");
                 await opts.sw.wispServer(wispServerSwitcher.value, true);
                 adBlockingFunc();
             }
 
-            // We reset this after 4 seconds (any errors OR success)
             setTimeout(reset, 4000);
         });
 
@@ -172,6 +193,7 @@ Object.keys(SearchEngines).forEach((k) =>
             await transport({settings, sw, storageManager});
             await proxy({settings, sw, storageManager});
             await searchEngine({settings, sw, storageManager});
+            await tabReordering({settings, sw, storageManager}); // NEW
             await wispServer({settings, sw, storageManager});
         } catch (err) {
             //console.log(err);
