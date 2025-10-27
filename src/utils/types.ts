@@ -12,6 +12,7 @@ type DropdownOptions = {
 };
 
 const SearchEngines: Record<string, string> = {
+    Aol: "https://search.aol.com/aol/search?q=%s",
     Bing: "https://bing.com/search?q=%s",
     Brave: "https://search.brave.com/search?q=%s",
     DuckDuckGo: "https://duckduckgo.com/?q=%s",
