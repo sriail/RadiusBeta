@@ -730,6 +730,25 @@ if (url.startsWith("about:")) {
         }
     }
 
+    private handleRedirectParam() {
+    const linkElement = document.querySelector("link-element") as any;
+    const link = linkElement?.dataset?.link;
+    
+    if (link) {
+        // ... existing code ...
+    }
+    
+    // NEW: Check if URL has /settings path
+    if (window.location.pathname === '/settings') {
+        // User navigated directly to /settings, open it as a tab
+        setTimeout(() => {
+            this.openSettings();
+            // Clean up URL
+            window.history.replaceState({}, '', '/');
+        }, 300);
+    }
+}
+            
     private setupKeyboardShortcuts() {
         document.addEventListener("keydown", (e) => {
             if (e.ctrlKey && e.key === "t") {
