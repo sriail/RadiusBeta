@@ -9,6 +9,27 @@ Object.keys(SearchEngines).forEach((k) =>
     SearchEngineOptions.push({ name: k, value: SearchEngines[k] })
 );
 ---
+
+<div class="mb-4">
+    <button 
+        id="back-to-home" 
+        class="px-4 py-2 rounded-lg bg-(--muted) hover:bg-(--accent) transition-colors"
+    >
+        ← Back to Browser
+    </button>
+</div>
+
+<script>
+    document.getElementById('back-to-home')?.addEventListener('click', () => {
+        // If in iframe (tab), close the tab
+        if (window.parent !== window) {
+            window.parent.postMessage({ type: 'close-settings' }, '*');
+        } else {
+            // If standalone, go back to home
+            window.location.href = '/';
+        }
+    });
+</script>
 <SettingsLayout active="proxy" title="Proxy"> 
     <div class="w-full flex-grow">
         <div>
