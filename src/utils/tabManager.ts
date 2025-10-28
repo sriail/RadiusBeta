@@ -48,19 +48,10 @@ export class TabManager {
         this.sw = SW.getInstance().next().value!;
         this.settings = await Settings.getInstance();
         
-        // Initialize bookmarks
         this.initBookmarks();
-
-        // Load saved tabs or create default tab
         await this.loadTabs();
-        
-        // Setup event listeners
         this.setupEventListeners();
-        
-        // Handle redirect parameter
         this.handleRedirectParam();
-
-        // Setup keyboard shortcuts
         this.setupKeyboardShortcuts();
     }
 
@@ -86,10 +77,8 @@ export class TabManager {
         if (savedTabs) {
             try {
                 this.tabs = JSON.parse(savedTabs);
-                // Render all saved tabs
                 this.tabs.forEach(tab => this.renderTab(tab));
                 
-                // Activate the previously active tab
                 const activeTab = this.tabs.find(t => t.isActive);
                 if (activeTab) {
                     this.activateTab(activeTab.id);
@@ -159,37 +148,31 @@ export class TabManager {
 
         tabElement.appendChild(tabContent);
         tabElement.appendChild(closeBtn);
-
         tabElement.onclick = () => this.activateTab(tab.id);
 
-        // Drag and drop for reordering
         tabElement.ondragstart = (e) => this.handleDragStart(e, tab.id);
         tabElement.ondragover = (e) => this.handleDragOver(e, tab.id);
         tabElement.ondragend = () => this.handleDragEnd();
 
         tabsContainer.appendChild(tabElement);
-
-        // Render tab content
         this.renderTabContent(tab);
     }
 
     private renderTabContent(tab: Tab) {
-    const contentArea = document.getElementById("tab-content-area");
-    if (!contentArea) return;
+        const contentArea = document.getElementById("tab-content-area");
+        if (!contentArea) return;
 
-    const tabContentDiv = document.createElement("div");
-    tabContentDiv.id = `content-${tab.id}`;
-    // FIXED: Use inline styles instead of classes
-    tabContentDiv.style.position = 'absolute';
-    tabContentDiv.style.top = '0';
-    tabContentDiv.style.left = '0';
-    tabContentDiv.style.width = '100%';
-    tabContentDiv.style.height = '100%';
-    tabContentDiv.style.display = tab.isActive ? 'block' : 'none';
-    tabContentDiv.style.zIndex = tab.isActive ? '10' : '1';
+        const tabContentDiv = document.createElement("div");
+        tabContentDiv.id = `content-${tab.id}`;
+        tabContentDiv.style.position = 'absolute';
+        tabContentDiv.style.top = '0';
+        tabContentDiv.style.left = '0';
+        tabContentDiv.style.width = '100%';
+        tabContentDiv.style.height = '100%';
+        tabContentDiv.style.display = tab.isActive ? 'block' : 'none';
+        tabContentDiv.style.zIndex = tab.isActive ? '10' : '1';
 
         if (tab.url && !tab.url.startsWith("about:")) {
-            // Create iframe for external URLs
             const iframe = document.createElement("iframe");
             iframe.id = `iframe-${tab.id}`;
             iframe.className = "w-full h-full border-0";
@@ -201,11 +184,9 @@ export class TabManager {
             this.iframeRefs.set(tab.id, iframe);
             tabContentDiv.appendChild(iframe);
         } else if (tab.url === "about:settings") {
-            // Navigate to settings page
             window.location.href = "/settings";
             return;
         } else {
-            // Show new tab page
             tabContentDiv.innerHTML = this.getNewTabPageHTML();
             this.setupNewTabPageListeners(tab.id);
         }
@@ -308,7 +289,6 @@ export class TabManager {
                 this.saveTabs();
             }
         } catch (e) {
-            // Cross-origin restriction - fetch favicon via Google API
             this.fetchFavicon(tabId, tab.url);
         }
     }
@@ -352,71 +332,75 @@ export class TabManager {
         }
     }
 
-private activateTab(tabId: string) {
-    this.tabs.forEach(tab => {
-        tab.isActive = tab.id === tabId;
-        
-        // Update tab styling
-        const tabEl = document.getElementById(`tab-${tab.id}`);
-        if (tabEl) {
-            if (tab.isActive) {
-                tabEl.className = tabEl.className.replace('bg-(--muted) mt-1 hover:bg-(--accent)', 'bg-(--card) shadow-sm z-10');
-            } else {
-                tabEl.className = tabEl.className.replace('bg-(--card) shadow-sm z-10', 'bg-(--muted) mt-1 hover:bg-(--accent)');
+    private activateTab(tabId: string) {
+        this.tabs.forEach(tab => {
+            tab.isActive = tab.id === tabId;
+            
+            const tabEl = document.getElementById(`tab-${tab.id}`);
+            if (tabEl) {
+                if (tab.isActive) {
+                    tabEl.className = tabEl.className.replace('bg-(--muted) mt-1 hover:bg-(--accent)', 'bg-(--card) shadow-sm z-10');
+                } else {
+                    tabEl.className = tabEl.className.replace('bg-(--card) shadow-sm z-10', 'bg-(--muted) mt-1 hover:bg-(--accent)');
+                }
             }
+
+            const contentEl = document.getElementById(`content-${tab.id}`) as HTMLElement;
+            if (contentEl) {
+                if (tab.isActive) {
+                    contentEl.style.display = 'block';
+                    contentEl.style.zIndex = '10';
+                } else {
+                    contentEl.style.display = 'none';
+                    contentEl.style.zIndex = '1';
+                }
+            }
+        });
+
+        const activeTab = this.tabs.find(t => t.id === tabId);
+        if (activeTab) {
+            const urlInput = document.getElementById("url-input") as HTMLInputElement;
+            if (urlInput) urlInput.value = activeTab.url;
         }
 
-        // FIXED: Update content visibility using display property
-        const contentEl = document.getElementById(`content-${tab.id}`) as HTMLElement;
-        if (contentEl) {
-            if (tab.isActive) {
-                contentEl.style.display = 'block';
-                contentEl.style.zIndex = '10';
-            } else {
-                contentEl.style.display = 'none';
-                contentEl.style.zIndex = '1';
-            }
-        }
-    });
-
-    const activeTab = this.tabs.find(t => t.id === tabId);
-    if (activeTab) {
-        const urlInput = document.getElementById("url-input") as HTMLInputElement;
-        if (urlInput) urlInput.value = activeTab.url;
+        this.saveTabs();
     }
 
-    this.saveTabs();
-}
-  private closeTab(tabId: string) {
-        if (tabEl) {
-            if (tab.isActive) {
-                tabEl.className = tabEl.className.replace('bg-(--muted) mt-1 hover:bg-(--accent)', 'bg-(--card) shadow-sm z-10');
-            } else {
-                tabEl.className = tabEl.className.replace('bg-(--card) shadow-sm z-10', 'bg-(--muted) mt-1 hover:bg-(--accent)');
+    private closeTab(tabId: string) {
+        if (this.tabs.length === 1) {
+            const tab = this.tabs[0];
+            tab.url = "";
+            tab.title = "New Tab";
+            tab.favicon = "";
+            
+            const contentEl = document.getElementById(`content-${tab.id}`);
+            if (contentEl) {
+                contentEl.innerHTML = this.getNewTabPageHTML();
+                this.setupNewTabPageListeners(tab.id);
             }
+            
+            this.updateTabDisplay(tab.id);
+            this.saveTabs();
+            return;
         }
 
-        // FIXED: Update content visibility using display property
-        const contentEl = document.getElementById(`content-${tab.id}`) as HTMLElement;
-        if (contentEl) {
-            if (tab.isActive) {
-                contentEl.style.display = 'block';
-                contentEl.style.zIndex = '10';
-            } else {
-                contentEl.style.display = 'none';
-                contentEl.style.zIndex = '1';
-            }
-        }
-    });
+        const tabIndex = this.tabs.findIndex(t => t.id === tabId);
+        const wasActive = this.tabs[tabIndex].isActive;
 
-    const activeTab = this.tabs.find(t => t.id === tabId);
-    if (activeTab) {
-        const urlInput = document.getElementById("url-input") as HTMLInputElement;
-        if (urlInput) urlInput.value = activeTab.url;
+        document.getElementById(`tab-${tabId}`)?.remove();
+        document.getElementById(`content-${tabId}`)?.remove();
+        this.iframeRefs.delete(tabId);
+
+        this.tabs.splice(tabIndex, 1);
+
+        if (wasActive && this.tabs.length > 0) {
+            const newActiveIndex = Math.max(0, tabIndex - 1);
+            this.activateTab(this.tabs[newActiveIndex].id);
+        }
+
+        this.saveTabs();
     }
 
-    this.saveTabs();
-}
     private addTab() {
         const newTab: Tab = {
             id: `tab-${Date.now()}`,
@@ -426,7 +410,6 @@ private activateTab(tabId: string) {
             isActive: true
         };
 
-        // Deactivate all other tabs
         this.tabs.forEach(t => t.isActive = false);
         this.tabs.push(newTab);
 
@@ -434,7 +417,6 @@ private activateTab(tabId: string) {
         this.activateTab(newTab.id);
         this.saveTabs();
 
-        // Focus URL bar
         const urlInput = document.getElementById("url-input") as HTMLInputElement;
         if (urlInput) {
             urlInput.value = "";
@@ -447,8 +429,6 @@ private activateTab(tabId: string) {
         if (!tab) return;
 
         let url = input.trim();
-        
-        // Check if it's a URL or search query
         const isURL = url.includes(".") && !url.includes(" ") && !url.startsWith("about:");
         
         if (url.startsWith("about:")) {
@@ -460,7 +440,6 @@ private activateTab(tabId: string) {
             if (isURL) {
                 url = `https://${url}`;
             } else {
-                // Use search engine
                 const searchEngine = this.storage.getVal("searchEngine") || "https://www.google.com/search?q=";
                 url = `${searchEngine}${encodeURIComponent(url)}`;
             }
@@ -469,23 +448,19 @@ private activateTab(tabId: string) {
         tab.url = url;
         tab.title = "Loading...";
         
-        // Remove old content
         const oldContent = document.getElementById(`content-${tabId}`);
         if (oldContent) oldContent.remove();
 
-        // Render new content
         this.renderTabContent(tab);
         
         const newContent = document.getElementById(`content-${tabId}`) as HTMLElement;
         if (newContent) {
-        newContent.style.display = 'block';
-        newContent.style.zIndex = '10';
-    }
+            newContent.style.display = 'block';
+            newContent.style.zIndex = '10';
+        }
         
-        // Update display
         this.updateTabDisplay(tabId);
         
-        // Update URL bar
         const urlInput = document.getElementById("url-input") as HTMLInputElement;
         if (urlInput) urlInput.value = url;
 
@@ -493,10 +468,8 @@ private activateTab(tabId: string) {
     }
 
     private setupEventListeners() {
-        // Add tab button
         document.getElementById("add-tab-btn")?.addEventListener("click", () => this.addTab());
 
-        // URL bar
         const urlInput = document.getElementById("url-input") as HTMLInputElement;
         urlInput?.addEventListener("keypress", (e) => {
             if (e.key === "Enter") {
@@ -507,7 +480,6 @@ private activateTab(tabId: string) {
             }
         });
 
-        // Navigation buttons
         document.getElementById("nav-back")?.addEventListener("click", () => this.goBack());
         document.getElementById("nav-forward")?.addEventListener("click", () => this.goForward());
         document.getElementById("nav-refresh")?.addEventListener("click", () => this.refresh());
@@ -601,32 +573,27 @@ private activateTab(tabId: string) {
 
     private setupKeyboardShortcuts() {
         document.addEventListener("keydown", (e) => {
-            // Ctrl+T: New tab
             if (e.ctrlKey && e.key === "t") {
                 e.preventDefault();
                 this.addTab();
             }
-            // Ctrl+W: Close tab
             else if (e.ctrlKey && e.key === "w") {
                 e.preventDefault();
                 const activeTab = this.tabs.find(t => t.isActive);
                 if (activeTab) this.closeTab(activeTab.id);
             }
-            // Ctrl+S: Focus search
             else if (e.ctrlKey && e.key === "s") {
                 e.preventDefault();
                 const urlInput = document.getElementById("url-input") as HTMLInputElement;
                 urlInput?.focus();
                 urlInput?.select();
             }
-            // Ctrl+Tab: Next tab
             else if (e.ctrlKey && e.key === "Tab" && !e.shiftKey) {
                 e.preventDefault();
                 const activeIndex = this.tabs.findIndex(t => t.isActive);
                 const nextIndex = (activeIndex + 1) % this.tabs.length;
                 this.activateTab(this.tabs[nextIndex].id);
             }
-            // Ctrl+Shift+Tab: Previous tab
             else if (e.ctrlKey && e.shiftKey && e.key === "Tab") {
                 e.preventDefault();
                 const activeIndex = this.tabs.findIndex(t => t.isActive);
@@ -636,7 +603,6 @@ private activateTab(tabId: string) {
         });
     }
 
-    // Drag and drop handlers
     private draggedTabId: string | null = null;
 
     private handleDragStart(e: DragEvent, tabId: string) {
@@ -662,11 +628,9 @@ private activateTab(tabId: string) {
 
         if (draggedIndex === -1 || targetIndex === -1) return;
 
-        // Reorder tabs
         const [draggedTab] = this.tabs.splice(draggedIndex, 1);
         this.tabs.splice(targetIndex, 0, draggedTab);
 
-        // Re-render tabs
         const tabsContainer = document.getElementById("tabs-container");
         if (tabsContainer) {
             tabsContainer.innerHTML = "";
@@ -685,7 +649,6 @@ private activateTab(tabId: string) {
     }
 }
 
-// Custom element for redirect handling
 class LinkElement extends HTMLElement {
     connectedCallback() {
         // This element is just for data storage, handled by TabManager
