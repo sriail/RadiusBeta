@@ -352,26 +352,41 @@ export class TabManager {
         }
     }
 
-    private activateTab(tabId: string) {
-        this.tabs.forEach(tab => {
-            tab.isActive = tab.id === tabId;
-            
-            // Update tab styling
-            const tabEl = document.getElementById(`tab-${tab.id}`);
-            if (tabEl) {
-                if (tab.isActive) {
-                    tabEl.className = tabEl.className.replace('bg-(--muted) mt-1 hover:bg-(--accent)', 'bg-(--card) shadow-sm z-10');
-                } else {
-                    tabEl.className = tabEl.className.replace('bg-(--card) shadow-sm z-10', 'bg-(--muted) mt-1 hover:bg-(--accent)');
-                }
+ private activateTab(tabId: string) {
+    this.tabs.forEach(tab => {
+        tab.isActive = tab.id === tabId;
+        
+        // Update tab styling
+        const tabEl = document.getElementById(`tab-${tab.id}`);
+        if (tabEl) {
+            if (tab.isActive) {
+                tabEl.className = tabEl.className.replace('bg-(--muted) mt-1 hover:bg-(--accent)', 'bg-(--card) shadow-sm z-10');
+            } else {
+                tabEl.className = tabEl.className.replace('bg-(--card) shadow-sm z-10', 'bg-(--muted) mt-1 hover:bg-(--accent)');
             }
+        }
 
-            // Update content visibility
-            const contentEl = document.getElementById(`content-${tab.id}`);
-            if (contentEl) {
-                contentEl.className = contentEl.className.replace(tab.isActive ? 'invisible' : 'visible', tab.isActive ? 'visible' : 'invisible');
+        // FIXED: Update content visibility using display property
+        const contentEl = document.getElementById(`content-${tab.id}`) as HTMLElement;
+        if (contentEl) {
+            if (tab.isActive) {
+                contentEl.style.display = 'block';
+                contentEl.style.zIndex = '10';
+            } else {
+                contentEl.style.display = 'none';
+                contentEl.style.zIndex = '1';
             }
-        });
+        }
+    });
+
+    const activeTab = this.tabs.find(t => t.id === tabId);
+    if (activeTab) {
+        const urlInput = document.getElementById("url-input") as HTMLInputElement;
+        if (urlInput) urlInput.value = activeTab.url;
+    }
+
+    this.saveTabs();
+}
 
         const activeTab = this.tabs.find(t => t.id === tabId);
         if (activeTab) {
