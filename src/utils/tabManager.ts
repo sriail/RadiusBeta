@@ -619,36 +619,41 @@ if (url.startsWith("about:")) {
     this.saveTabs();
 }
 
-    private setupEventListeners() {
-        document.getElementById("add-tab-btn")?.addEventListener("click", () => this.addTab());
+private setupEventListeners() {
+    // Add tab button
+    document.getElementById("add-tab-btn")?.addEventListener("click", () => this.addTab());
 
-        const urlInput = document.getElementById("url-input") as HTMLInputElement;
-        urlInput?.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                const activeTab = this.tabs.find(t => t.isActive);
-                if (activeTab) {
-                    this.navigateTab(activeTab.id, urlInput.value);
-                }
+    // URL bar
+    const urlInput = document.getElementById("url-input") as HTMLInputElement;
+    urlInput?.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            const activeTab = this.tabs.find(t => t.isActive);
+            if (activeTab) {
+                this.navigateTab(activeTab.id, urlInput.value);
             }
-        });
-
-        document.getElementById("nav-back")?.addEventListener("click", () => this.goBack());
-        document.getElementById("nav-forward")?.addEventListener("click", () => this.goForward());
-        document.getElementById("nav-refresh")?.addEventListener("click", () => this.refresh());
-        document.getElementById("nav-bookmark")?.addEventListener("click", () => this.addBookmark());
-        document.getElementById("nav-fullscreen")?.addEventListener("click", () => this.toggleFullscreen());
-        document.getElementById("nav-settings")?.addEventListener("click", () => {
-    this.openSettings();
-            
-    window.addEventListener('message', (event) => {
-    if (event.data.type === 'close-settings') {
-        const settingsTab = this.tabs.find(t => t.url === "about:settings");
-        if (settingsTab) {
-            this.closeTab(settingsTab.id);
         }
-    }
-});
+    });
 
+    // Navigation buttons
+    document.getElementById("nav-back")?.addEventListener("click", () => this.goBack());
+    document.getElementById("nav-forward")?.addEventListener("click", () => this.goForward());
+    document.getElementById("nav-refresh")?.addEventListener("click", () => this.refresh());
+    document.getElementById("nav-bookmark")?.addEventListener("click", () => this.addBookmark());
+    document.getElementById("nav-fullscreen")?.addEventListener("click", () => this.toggleFullscreen());
+    document.getElementById("nav-settings")?.addEventListener("click", () => {
+        this.openSettings();
+    });
+    
+    // NEW: Listen for settings tab close messages
+    window.addEventListener('message', (event) => {
+        if (event.data.type === 'close-settings') {
+            const settingsTab = this.tabs.find(t => t.url === "about:settings");
+            if (settingsTab) {
+                this.closeTab(settingsTab.id);
+            }
+        }
+    });
+}
     private goBack() {
         const activeTab = this.tabs.find(t => t.isActive);
         if (!activeTab) return;
