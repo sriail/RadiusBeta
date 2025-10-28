@@ -1,0 +1,99 @@
+---
+// Themed scrollbar styles for tabs
+---
+
+<style is:global>
+    /* Tab Container Scrollbar Styling */
+    #tabs-container {
+        scrollbar-width: thin;
+        scrollbar-color: hsl(var(--muted-foreground)) hsl(var(--background));
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-behavior: smooth;
+    }
+
+    /* WebKit (Chrome, Safari, Edge) Scrollbar */
+    #tabs-container::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    #tabs-container::-webkit-scrollbar-track {
+        background: hsl(var(--background));
+        border-radius: 3px;
+        margin: 0 8px;
+    }
+
+    #tabs-container::-webkit-scrollbar-thumb {
+        background: hsl(var(--muted-foreground));
+        border-radius: 3px;
+        transition: background 0.2s ease;
+    }
+
+    #tabs-container::-webkit-scrollbar-thumb:hover {
+        background: hsl(var(--foreground) / 0.6);
+    }
+
+    #tabs-container::-webkit-scrollbar-thumb:active {
+        background: hsl(var(--primary));
+    }
+
+    /* Show scrollbar only on hover */
+    #tabs-container::-webkit-scrollbar {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    #tabs-container:hover::-webkit-scrollbar,
+    #tabs-container:focus-within::-webkit-scrollbar {
+        opacity: 1;
+    }
+
+    /* Firefox */
+    #tabs-container {
+        scrollbar-width: none;
+    }
+
+    #tabs-container:hover {
+        scrollbar-width: thin;
+    }
+
+    /* Tab animations */
+    [id^="tab-"] {
+        transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                    max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                    min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.2s ease;
+    }
+
+    [id^="tab-"] span {
+        transition: opacity 0.15s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Compact mode styling */
+    [id^="tab-"].compact {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    [id^="tab-"].compact button {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    [id^="tab-"].compact:hover button {
+        opacity: 0.6;
+        pointer-events: auto;
+    }
+
+    [id^="tab-"].compact:hover button:hover {
+        opacity: 1 !important;
+    }
+
+    /* Very compact mode (favicon only) */
+    [id^="tab-"][style*="width: 40px"] img {
+        margin: 0 auto;
+    }
+</style>
