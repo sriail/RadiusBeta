@@ -53,6 +53,9 @@ export class TabManager {
         this.setupEventListeners();
         this.handleRedirectParam();
         this.setupKeyboardShortcuts();
+        
+        // NEW: Update tab sizes on window resize
+        window.addEventListener('resize', () => this.updateTabSizes());
     }
 
     private initBookmarks() {
@@ -158,7 +161,11 @@ export class TabManager {
         tabElement.ondragend = () => this.handleDragEnd();
 
         tabsContainer.appendChild(tabElement);
+
         this.renderTabContent(tab);
+        
+        // Update tab sizes
+        setTimeout(() => this.updateTabSizes(), 50);
     }
 
     private renderTabContent(tab: Tab) {
@@ -195,6 +202,89 @@ export class TabManager {
         }
 
         contentArea.appendChild(tabContentDiv);
+    }
+
+        private updateTabSizes() {
+        const tabsContainer = document.getElementById("tabs-container");
+        if (!tabsContainer) return;
+
+        const containerWidth = tabsContainer.offsetWidth - 40;
+        const tabCount = this.tabs.length;
+        
+        const maxTabWidth = 240;
+        const minTabWidth = 40;
+        const compactThreshold = 100;
+        const idealWidth = containerWidth / tabCount;
+        
+        let tabWidth: number;
+        let isScrollable = false;
+        
+        if (idealWidth >= maxTabWidth) {
+            tabWidth = maxTabWidth;
+        } else if (idealWidth >= minTabWidth) {
+            tabWidth = idealWidth;
+        } else {
+            tabWidth = minTabWidth;
+            isScrollable = true;
+        }
+        
+        // Apply width and styling to all tabs
+        this.tabs.forEach(tab => {
+            const tabEl = document.getElementById(`tab-${tab.id}`) as HTMLElement;
+            if (tabEl) {
+                tabEl.style.width = `${tabWidth}px`;
+                tabEl.style.maxWidth = `${tabWidth}px`;
+                tabEl.style.minWidth = `${tabWidth}px`;
+                
+                // Add/remove compact class
+                if (tabWidth < compactThreshold) {
+                    tabEl.classList.add('compact');
+                } else {
+                    tabEl.classList.remove('compact');
+                }
+                
+                // Hide/show title text
+                const titleSpan = tabEl.querySelector('span') as HTMLElement;
+                if (titleSpan) {
+                    if (tabWidth < 80) {
+                        titleSpan.style.display = 'none';
+                    } else {
+                        titleSpan.style.display = 'block';
+                    }
+                }
+                
+                // Adjust favicon margin on small tabs
+                const favicon = tabEl.querySelector('img') as HTMLElement;
+                if (favicon) {
+                    if (tabWidth < 80) {
+                        favicon.style.marginRight = '0';
+                    } else {
+                        favicon.style.marginRight = '0.5rem';
+                    }
+                }
+            }
+        });
+        
+        // Adjust container scrolling
+        if (isScrollable) {
+            tabsContainer.style.justifyContent = 'flex-start';
+        } else {
+            tabsContainer.style.justifyContent = 'flex-start';
+        }
+    }
+
+    private scrollToTab(tabId: string) {
+        const tabsContainer = document.getElementById("tabs-container");
+        const tabEl = document.getElementById(`tab-${tabId}`);
+        
+        if (tabsContainer && tabEl) {
+            // Smooth scroll the active tab into view
+            tabEl.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+            });
+        }
     }
 
     private getNewTabPageHTML(): string {
@@ -360,14 +450,17 @@ export class TabManager {
             }
         });
 
-        const activeTab = this.tabs.find(t => t.id === tabId);
-        if (activeTab) {
-            const urlInput = document.getElementById("url-input") as HTMLInputElement;
-            if (urlInput) urlInput.value = activeTab.url;
-        }
-
-        this.saveTabs();
+     const activeTab = this.tabs.find(t => t.id === tabId);
+    if (activeTab) {
+        const urlInput = document.getElementById("url-input") as HTMLInputElement;
+        if (urlInput) urlInput.value = activeTab.url;
+        
+        // NEW: Scroll to active tab
+        this.scrollToTab(tabId);
     }
+
+    this.saveTabs();
+}
 
     private closeTab(tabId: string) {
         if (this.tabs.length === 1) {
@@ -402,6 +495,9 @@ export class TabManager {
         }
 
         this.saveTabs();
+        
+        // NEW: Update tab sizes
+        setTimeout(() => this.updateTabSizes(), 50);
     }
 
     private addTab() {
