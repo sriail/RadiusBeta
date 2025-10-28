@@ -48,17 +48,17 @@ export class TabManager {
     async init() {
         this.sw = SW.getInstance().next().value!;
         this.settings = await Settings.getInstance();
-        
+    
         this.initBookmarks();
         await this.loadTabs();
         this.setupEventListeners();
+        this.setupSettingsMessageHandler();  // NEW
         this.handleRedirectParam();
         this.setupKeyboardShortcuts();
-        
-        // NEW: Update tab sizes on window resize
-        window.addEventListener('resize', () => this.updateTabSizes());
-    }
-
+    
+    // Update tab sizes on window resize
+    window.addEventListener('resize', () => this.updateTabSizes());
+}
     private initBookmarks() {
         const saved = this.bookmarkStorage.getVal("list");
         if (!saved) {
@@ -619,6 +619,94 @@ if (url.startsWith("about:")) {
     this.saveTabs();
 }
 
+    private setupSettingsMessageHandler() {
+    window.addEventListener('message', (event) => {
+        // Only accept messages from our own origin
+        if (event.origin !== window.location.origin) return;
+        
+        const { type, data } = event.data;
+        
+        switch (type) {
+            case 'close-settings':
+                const settingsTab = this.tabs.find(t => t.url === "about:settings");
+                if (settingsTab) {
+                    this.closeTab(settingsTab.id);
+                }
+                break;
+                
+            case 'update-proxy':
+                if (this.settings) {
+                    this.settings.proxy(data.value as "uv" | "sj");
+                }
+                break;
+                
+            case 'update-transport':
+                if (this.sw) {
+                    this.sw.setTransport(data.value as "epoxy" | "libcurl");
+                }
+                break;
+                
+            case 'update-search-engine':
+                if (this.settings) {
+                    this.settings.searchEngine(data.value);
+                }
+                break;
+                
+            case 'update-tab-reordering':
+                this.storage.setVal("allowTabReordering", data.value);
+                break;
+                
+            case 'update-wisp-server':
+                if (this.sw) {
+                    this.sw.wispServer(data.value, true).then(() => {
+                        // Send confirmation back to settings iframe
+                        this.sendMessageToSettingsTab({ type: 'wisp-updated', success: true });
+                    }).catch(() => {
+                        this.sendMessageToSettingsTab({ type: 'wisp-updated', success: false });
+                    });
+                }
+                break;
+                
+            case 'update-ad-blocking':
+                if (this.settings) {
+                    this.settings.adBlock(data.value);
+                }
+                break;
+                
+            case 'get-settings':
+                // Send current settings to the settings iframe
+                this.sendSettingsToIframe();
+                break;
+        }
+    });
+}
+
+private sendMessageToSettingsTab(message: any) {
+    const settingsTab = this.tabs.find(t => t.url === "about:settings");
+    if (settingsTab) {
+        const iframe = this.iframeRefs.get(settingsTab.id);
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage(message, window.location.origin);
+        }
+    }
+}
+
+private sendSettingsToIframe() {
+    const settingsData = {
+        type: 'settings-data',
+        data: {
+            proxy: this.storage.getVal("proxy") || "uv",
+            transport: this.storage.getVal("transport") || "libcurl",
+            searchEngine: this.storage.getVal("searchEngine"),
+            allowTabReordering: this.storage.getVal("allowTabReordering") || "false",
+            wispServer: this.storage.getVal("wispServer"),
+            adBlock: this.storage.getVal("adBlock") || "false"
+        }
+    };
+    
+    this.sendMessageToSettingsTab(settingsData);
+}
+    
 private setupEventListeners() {
     // Add tab button
     document.getElementById("add-tab-btn")?.addEventListener("click", () => this.addTab());
@@ -645,13 +733,8 @@ private setupEventListeners() {
     });
     
     // NEW: Listen for settings tab close messages
-    window.addEventListener('message', (event) => {
-        if (event.data.type === 'close-settings') {
-            const settingsTab = this.tabs.find(t => t.url === "about:settings");
-            if (settingsTab) {
-                this.closeTab(settingsTab.id);
-            }
-        }
+    document.getElementById("nav-settings")?.addEventListener("click", () => {
+        this.openSettings();
     });
 }
     private goBack() {
