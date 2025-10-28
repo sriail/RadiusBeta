@@ -174,12 +174,19 @@ export class TabManager {
     }
 
     private renderTabContent(tab: Tab) {
-        const contentArea = document.getElementById("tab-content-area");
-        if (!contentArea) return;
+    const contentArea = document.getElementById("tab-content-area");
+    if (!contentArea) return;
 
-        const tabContentDiv = document.createElement("div");
-        tabContentDiv.id = `content-${tab.id}`;
-        tabContentDiv.className = `absolute inset-0 w-full h-full ${tab.isActive ? 'visible' : 'invisible'}`;
+    const tabContentDiv = document.createElement("div");
+    tabContentDiv.id = `content-${tab.id}`;
+    // FIXED: Use inline styles instead of classes
+    tabContentDiv.style.position = 'absolute';
+    tabContentDiv.style.top = '0';
+    tabContentDiv.style.left = '0';
+    tabContentDiv.style.width = '100%';
+    tabContentDiv.style.height = '100%';
+    tabContentDiv.style.display = tab.isActive ? 'block' : 'none';
+    tabContentDiv.style.zIndex = tab.isActive ? '10' : '1';
 
         if (tab.url && !tab.url.startsWith("about:")) {
             // Create iframe for external URLs
