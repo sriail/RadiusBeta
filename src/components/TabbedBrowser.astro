@@ -1,8 +1,10 @@
 ---
 import { Icon } from "astro-icon/components";
+import TabScrollbar from "@components/TabScrollbar.astro";
 const link = Astro.url.searchParams.get("redir");
 ---
 
+<TabScrollbar />
 <div id="tabbed-browser" class="h-full w-full flex flex-col bg-(--background)">
     <!-- Tab Bar -->
     <div id="tab-bar" class="flex items-center bg-(--background) border-b border-(--border) h-10 px-1 overflow-x-auto">
