@@ -194,13 +194,21 @@ export class TabManager {
             
             this.iframeRefs.set(tab.id, iframe);
             tabContentDiv.appendChild(iframe);
-        } else if (tab.url === "about:settings") {
-        // Load settings page in iframe
-        const settingsFrame = document.createElement("iframe");
-        settingsFrame.id = `iframe-${tab.id}`;
-        settingsFrame.className = "w-full h-full border-0";
-        settingsFrame.src = "/settings";
+       } else if (tab.url === "about:settings") {
+    // Load settings page in iframe
+    const settingsFrame = document.createElement("iframe");
+    settingsFrame.id = `iframe-${tab.id}`;
+    settingsFrame.className = "w-full h-full border-0";
+    settingsFrame.src = "/settings";
     
+    // Send settings data when iframe loads
+    settingsFrame.onload = () => {
+        setTimeout(() => {
+            this.sendSettingsToIframe();
+        }, 100);
+    };
+    
+    this.iframeRefs.set(tab.id, settingsFrame);
     tabContentDiv.appendChild(settingsFrame);
     } else {
             tabContentDiv.innerHTML = this.getNewTabPageHTML();
