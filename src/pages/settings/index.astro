@@ -10,214 +10,263 @@ Object.keys(SearchEngines).forEach((k) =>
 );
 ---
 
-<div class="mb-4">
-    <button 
-        id="back-to-home" 
-        class="px-4 py-2 rounded-lg bg-(--muted) hover:bg-(--accent) transition-colors"
-    >
-        ← Back to Browser
-    </button>
-</div>
-
-<script>
-    document.getElementById('back-to-home')?.addEventListener('click', () => {
-        // If in iframe (tab), close the tab
-        if (window.parent !== window) {
-            window.parent.postMessage({ type: 'close-settings' }, '*');
-        } else {
-            // If standalone, go back to home
-            window.location.href = '/';
+<script is:inline>
+    document.addEventListener('DOMContentLoaded', function() {
+        var backButton = document.getElementById('back-to-home');
+        if (backButton) {
+            backButton.addEventListener('click', function() {
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'close-settings' }, window.location.origin);
+                } else {
+                    window.location.href = '/';
+                }
+            });
         }
     });
 </script>
-<SettingsLayout active="proxy" title="Proxy"> 
-    <div class="w-full flex-grow">
-        <div>
-            <p> Proxy Switcher </p>
-            <Dropdown id="pSwitcher" options={
-                [
-                    { name: 'Ultraviolet', value: 'uv', default: true },
-                    { name: 'Scramjet', value: 'sj' }
-                ]
-            } />
-        </div>
-        <div class="mt-2">
-            <p> Transport </p>
-            <Dropdown id="tSwitcher" options={
-                [
-                    { name: 'Libcurl', value: 'libcurl', default: true },
-                    { name: 'Epoxy', value: 'epoxy' }
-                ]
-            } />
-        </div>
-        <div class="mt-2">
-            <p> Search Engine </p>
-            <Dropdown id="sSwitcher" options={SearchEngineOptions} />
-        </div>
-        
-        <!-- NEW: Tab Settings Section -->
-        <div class="mt-6 pt-6 border-t border-(--border)">
-            <h2 class="text-2xl font-semibold mb-4">Tab Settings</h2>
-            <div class="mt-2">
-                <p> Allow Tab Reordering <span class="text-xs opacity-60">(Experimental)</span></p>
-                <Dropdown id="tabReorder" options={
-                    [
-                        { name: 'Enabled', value: 'true' },
-                        { name: 'Disabled', value: 'false', default: true }
-                    ]
-                } />
-            </div>
-        </div>
-        
-        <div class="mt-2 w-80">
-            <div>
-                <p> Wisp Server </p>
-                <Input id="wispServerSwitcher" placeholder="Wisp server URL (EX: wss://radiusproxy.app/wisp/" />
-                <div class="mt-2 hidden" id="adBlocking">
-                    <p> Ad Blocking </p>
-                    <Dropdown id="adBlocking" options={
-                        [
-                            { name: 'Enabled', value: 'enabled', default: true },
-                            { name: 'Disabled', value: 'disabled' }
-                        ]
-                    } />
-                </div>
-            </div>
-            <div class="mt-2 mb-2 hidden" id="wispServerInfo">
-                <p class="text-blue-500" id="wispServerInfo-inner"> Checking URL... </p>
-            </div>
-            <div class="mt-2 flex flex-row gap-4">
-                <Button id="wispServerSave" text="Save Changes" icon="material-symbols:save-outline" />
-                <Button id="wispServerReset" text="Reset" icon="material-symbols:refresh" />
-            </div>
-        </div>
-    </div>
-</SettingsLayout>
+
 <script>
-    import { Settings } from "@utils/settings.ts";
-    import { SW } from "@utils/proxy.ts";
     import { StoreManager } from "@utils/storage";
-    import { SearchEngines } from "@utils/types";
 
-    type Options = {
-        settings: Settings,
-        sw: SW,
-        storageManager: StoreManager<"radius||settings">
-    }
-
-    const transport = async (opts: Options) => {
-        const transportEl = document.getElementById("dropdownBox-tSwitcher") as HTMLSelectElement;
-        transportEl.value = opts.storageManager.getVal("transport") || "libcurl"; 
-        transportEl.addEventListener("change", async () => {
-            opts.sw.setTransport(transportEl.value as "epoxy" | "libcurl");
-        });
-    }
-
-    const proxy = async (opts: Options) => {
-        const proxyEl = document.getElementById("dropdownBox-pSwitcher") as HTMLSelectElement;
-        proxyEl.value = opts.storageManager.getVal("proxy") || "uv";
-        proxyEl.addEventListener("change", async () => {
-            opts.settings.proxy(proxyEl.value as "uv" | "sj");
-        });
-    }
-
-    const searchEngine = async (opts: Options) => {
-        const seEl = document.getElementById("dropdownBox-sSwitcher") as HTMLSelectElement;
-        seEl.value = opts.storageManager.getVal("searchEngine") || SearchEngines.DuckDuckGo;
-        seEl.addEventListener("change", async () => {
-            opts.settings.searchEngine(seEl.value);
-        });
-    }
+    // Check if we're in an iframe (settings tab)
+    const isInIframe = window.parent !== window;
     
-    // NEW: Tab reordering setting
-    const tabReordering = async (opts: Options) => {
-        const tabReorderEl = document.getElementById("dropdownBox-tabReorder") as HTMLSelectElement;
-        tabReorderEl.value = opts.storageManager.getVal("allowTabReordering") || "false";
-        tabReorderEl.addEventListener("change", async () => {
-            opts.storageManager.setVal("allowTabReordering", tabReorderEl.value);
+    let parentSettings: any = null;
+
+    if (isInIframe) {
+        // Running inside iframe - communicate with parent
+        console.log('Settings running in iframe mode');
+        
+        // Request current settings from parent
+        window.parent.postMessage({ type: 'get-settings' }, window.location.origin);
+        
+        // Listen for settings data from parent
+        window.addEventListener('message', (event) => {
+            if (event.origin !== window.location.origin) return;
+            
+            if (event.data.type === 'settings-data') {
+                parentSettings = event.data.data;
+                populateSettings(parentSettings);
+            } else if (event.data.type === 'wisp-updated') {
+                handleWispUpdate(event.data.success);
+            }
         });
+        
+        // Setup event listeners to send updates to parent
+        document.addEventListener('astro:page-load', setupIframeListeners);
+        
+    } else {
+        // Running standalone - use normal settings
+        console.log('Settings running in standalone mode');
+        document.addEventListener('astro:page-load', setupStandaloneListeners);
     }
 
-    const wispServer = async (opts: Options) => {
-        const wispServerSwitcher = document.getElementById("wispServerSwitcher") as HTMLInputElement;
-        const wispServerInfo = document.getElementById("wispServerInfo") as HTMLElement;
-        const wispServerInfoInner = document.getElementById("wispServerInfo-inner") as HTMLParagraphElement;
+    function populateSettings(settings: any) {
+        const proxyEl = document.getElementById("dropdownBox-pSwitcher") as HTMLSelectElement;
+        const transportEl = document.getElementById("dropdownBox-tSwitcher") as HTMLSelectElement;
+        const searchEngineEl = document.getElementById("dropdownBox-sSwitcher") as HTMLSelectElement;
+        const tabReorderEl = document.getElementById("dropdownBox-tabReorder") as HTMLSelectElement;
+        const wispServerEl = document.getElementById("wispServerSwitcher") as HTMLInputElement;
+        
+        if (proxyEl) proxyEl.value = settings.proxy || 'uv';
+        if (transportEl) transportEl.value = settings.transport || 'libcurl';
+        if (searchEngineEl && settings.searchEngine) searchEngineEl.value = settings.searchEngine;
+        if (tabReorderEl) tabReorderEl.value = settings.allowTabReordering || 'false';
+        if (wispServerEl && settings.wispServer) wispServerEl.value = settings.wispServer;
+    }
+
+    function setupIframeListeners() {
+        // Proxy switcher
+        const proxyEl = document.getElementById("dropdownBox-pSwitcher") as HTMLSelectElement;
+        proxyEl?.addEventListener("change", () => {
+            window.parent.postMessage({
+                type: 'update-proxy',
+                data: { value: proxyEl.value }
+            }, window.location.origin);
+        });
+
+        // Transport switcher
+        const transportEl = document.getElementById("dropdownBox-tSwitcher") as HTMLSelectElement;
+        transportEl?.addEventListener("change", () => {
+            window.parent.postMessage({
+                type: 'update-transport',
+                data: { value: transportEl.value }
+            }, window.location.origin);
+        });
+
+        // Search engine
+        const searchEngineEl = document.getElementById("dropdownBox-sSwitcher") as HTMLSelectElement;
+        searchEngineEl?.addEventListener("change", () => {
+            window.parent.postMessage({
+                type: 'update-search-engine',
+                data: { value: searchEngineEl.value }
+            }, window.location.origin);
+        });
+
+        // Tab reordering
+        const tabReorderEl = document.getElementById("dropdownBox-tabReorder") as HTMLSelectElement;
+        tabReorderEl?.addEventListener("change", () => {
+            window.parent.postMessage({
+                type: 'update-tab-reordering',
+                data: { value: tabReorderEl.value }
+            }, window.location.origin);
+        });
+
+        // WISP server
         const wispServerSave = document.getElementById("wispServerSave") as HTMLButtonElement;
         const wispServerReset = document.getElementById("wispServerReset") as HTMLButtonElement;
-        const adBlocking = document.getElementById("adBlocking") as HTMLDivElement;
+        const wispServerInput = document.getElementById("wispServerSwitcher") as HTMLInputElement;
+        const wispServerInfo = document.getElementById("wispServerInfo") as HTMLElement;
+        const wispServerInfoInner = document.getElementById("wispServerInfo-inner") as HTMLParagraphElement;
 
-        wispServerSwitcher.value = opts.storageManager.getVal("wispServer");
-        const resetVal = `${(location.protocol === "https:" ? "wss://" : "ws://")}${location.host}/wisp/` 
-        const reset = (hide: boolean = true) => {
-            if (hide) wispServerInfo.classList.add("hidden");
-            wispServerInfoInner.innerText = "Checking URL..."
-            wispServerInfoInner.classList.remove("text-red-500");
-            wispServerInfoInner.classList.remove("text-green-500");
-        };
-
-        const adBlockingFunc = () => {
-            const adBlockingDropdown = document.getElementById("dropdownBox-adBlocking") as HTMLSelectElement;
-            adBlockingDropdown.addEventListener("change", () => {
-                opts.settings.adBlock(adBlockingDropdown.value === "enabled" ? true : false);
-            });
-
-            adBlockingDropdown.value = opts.storageManager.getVal("adBlock") === "true" ? "enabled" : "disabled";
-
-            if (wispServerSwitcher.value === resetVal) {
-                adBlocking.classList.remove("hidden");
-                opts.settings.adBlock(true);
-                adBlockingDropdown.value = "enabled";
-            }
-            else {
-                adBlocking.classList.add("hidden");
-                opts.settings.adBlock(false);
-            }
-        }
-        adBlockingFunc();
-
-        wispServerSave.addEventListener("click", async () => {
-            const server = wispServerSwitcher.value;
-            wispServerInfo.classList.remove("hidden"); 
-
+        wispServerSave?.addEventListener("click", () => {
+            const server = wispServerInput.value;
+            wispServerInfo.classList.remove("hidden");
+            
             if (!server.match(/^wss?:\/\/.*/)) {
-                reset(false);
-                wispServerInfoInner.innerText = "Invalid URL! \nURL's MUST start with wss:// or ws://";
+                wispServerInfoInner.innerText = "Invalid URL! URLs MUST start with wss:// or ws://";
+                wispServerInfoInner.classList.remove("text-green-500");
                 wispServerInfoInner.classList.add("text-red-500");
+                setTimeout(() => wispServerInfo.classList.add("hidden"), 4000);
+            } else {
+                wispServerInfoInner.innerText = "Updating WISP server...";
+                wispServerInfoInner.classList.remove("text-red-500", "text-green-500");
+                
+                window.parent.postMessage({
+                    type: 'update-wisp-server',
+                    data: { value: server }
+                }, window.location.origin);
             }
-            else {
-                reset(false);
-                wispServerInfoInner.innerText = "Wisp Server Set!";
-                wispServerInfoInner.classList.add("text-green-500");
-                await opts.sw.wispServer(wispServerSwitcher.value, true);
-                adBlockingFunc();
-            }
-
-            setTimeout(reset, 4000);
         });
 
-        wispServerReset.addEventListener("click", async () => {
+        wispServerReset?.addEventListener("click", () => {
+            const resetVal = `${(location.protocol === "https:" ? "wss://" : "ws://")}${location.host}/wisp/`;
+            wispServerInput.value = resetVal;
+            
+            window.parent.postMessage({
+                type: 'update-wisp-server',
+                data: { value: resetVal }
+            }, window.location.origin);
+            
             wispServerInfo.classList.remove("hidden");
-            wispServerInfoInner.innerText = "Wisp Server Reset!";
+            wispServerInfoInner.innerText = "WISP Server Reset!";
+            wispServerInfoInner.classList.remove("text-red-500");
             wispServerInfoInner.classList.add("text-green-500");
-            await opts.sw.wispServer(resetVal, true);
-            wispServerSwitcher.value = opts.storageManager.getVal("wispServer");
-            setTimeout(reset, 4000);
-            adBlockingFunc();
+            setTimeout(() => wispServerInfo.classList.add("hidden"), 4000);
+        });
+
+        // Ad blocking
+        const adBlockingEl = document.getElementById("dropdownBox-adBlocking") as HTMLSelectElement;
+        adBlockingEl?.addEventListener("change", () => {
+            window.parent.postMessage({
+                type: 'update-ad-blocking',
+                data: { value: adBlockingEl.value === 'enabled' }
+            }, window.location.origin);
         });
     }
 
-    document.addEventListener("astro:page-load", async () => {
+    function handleWispUpdate(success: boolean) {
+        const wispServerInfo = document.getElementById("wispServerInfo") as HTMLElement;
+        const wispServerInfoInner = document.getElementById("wispServerInfo-inner") as HTMLParagraphElement;
+        
+        wispServerInfo.classList.remove("hidden");
+        
+        if (success) {
+            wispServerInfoInner.innerText = "WISP Server Updated!";
+            wispServerInfoInner.classList.remove("text-red-500");
+            wispServerInfoInner.classList.add("text-green-500");
+        } else {
+            wispServerInfoInner.innerText = "Failed to update WISP server";
+            wispServerInfoInner.classList.remove("text-green-500");
+            wispServerInfoInner.classList.add("text-red-500");
+        }
+        
+        setTimeout(() => wispServerInfo.classList.add("hidden"), 4000);
+    }
+
+    async function setupStandaloneListeners() {
+        // Import only when running standalone
+        const { Settings } = await import("@utils/settings.ts");
+        const { SW } = await import("@utils/proxy.ts");
+        const { SearchEngines } = await import("@utils/types");
+        
         try {
             const settings = await Settings.getInstance();
-            const sw = SW.getInstance().next().value!; 
+            const sw = SW.getInstance().next().value!;
             const storageManager = new StoreManager<"radius||settings">("radius||settings");
-            await transport({settings, sw, storageManager});
-            await proxy({settings, sw, storageManager});
-            await searchEngine({settings, sw, storageManager});
-            await tabReordering({settings, sw, storageManager}); // NEW
-            await wispServer({settings, sw, storageManager});
+
+            // Proxy
+            const proxyEl = document.getElementById("dropdownBox-pSwitcher") as HTMLSelectElement;
+            proxyEl.value = storageManager.getVal("proxy") || "uv";
+            proxyEl.addEventListener("change", async () => {
+                await settings.proxy(proxyEl.value as "uv" | "sj");
+            });
+
+            // Transport
+            const transportEl = document.getElementById("dropdownBox-tSwitcher") as HTMLSelectElement;
+            transportEl.value = storageManager.getVal("transport") || "libcurl";
+            transportEl.addEventListener("change", async () => {
+                sw.setTransport(transportEl.value as "epoxy" | "libcurl");
+            });
+
+            // Search Engine
+            const seEl = document.getElementById("dropdownBox-sSwitcher") as HTMLSelectElement;
+            seEl.value = storageManager.getVal("searchEngine") || SearchEngines.DuckDuckGo;
+            seEl.addEventListener("change", async () => {
+                await settings.searchEngine(seEl.value);
+            });
+
+            // Tab Reordering
+            const tabReorderEl = document.getElementById("dropdownBox-tabReorder") as HTMLSelectElement;
+            tabReorderEl.value = storageManager.getVal("allowTabReordering") || "false";
+            tabReorderEl.addEventListener("change", async () => {
+                storageManager.setVal("allowTabReordering", tabReorderEl.value);
+            });
+
+            // WISP Server (keep existing standalone logic)
+            const wispServerSwitcher = document.getElementById("wispServerSwitcher") as HTMLInputElement;
+            const wispServerInfo = document.getElementById("wispServerInfo") as HTMLElement;
+            const wispServerInfoInner = document.getElementById("wispServerInfo-inner") as HTMLParagraphElement;
+            const wispServerSave = document.getElementById("wispServerSave") as HTMLButtonElement;
+            const wispServerReset = document.getElementById("wispServerReset") as HTMLButtonElement;
+
+            wispServerSwitcher.value = storageManager.getVal("wispServer");
+            const resetVal = `${(location.protocol === "https:" ? "wss://" : "ws://")}${location.host}/wisp/`;
+
+            const reset = (hide: boolean = true) => {
+                if (hide) wispServerInfo.classList.add("hidden");
+                wispServerInfoInner.innerText = "Checking URL...";
+                wispServerInfoInner.classList.remove("text-red-500", "text-green-500");
+            };
+
+            wispServerSave.addEventListener("click", async () => {
+                const server = wispServerSwitcher.value;
+                wispServerInfo.classList.remove("hidden");
+
+                if (!server.match(/^wss?:\/\/.*/)) {
+                    reset(false);
+                    wispServerInfoInner.innerText = "Invalid URL! URLs MUST start with wss:// or ws://";
+                    wispServerInfoInner.classList.add("text-red-500");
+                } else {
+                    reset(false);
+                    wispServerInfoInner.innerText = "WISP Server Set!";
+                    wispServerInfoInner.classList.add("text-green-500");
+                    await sw.wispServer(wispServerSwitcher.value, true);
+                }
+
+                setTimeout(reset, 4000);
+            });
+
+            wispServerReset.addEventListener("click", async () => {
+                wispServerInfo.classList.remove("hidden");
+                wispServerInfoInner.innerText = "WISP Server Reset!";
+                wispServerInfoInner.classList.add("text-green-500");
+                await sw.wispServer(resetVal, true);
+                wispServerSwitcher.value = storageManager.getVal("wispServer");
+                setTimeout(reset, 4000);
+            });
         } catch (err) {
-            //console.log(err);
+            console.error("Settings error:", err);
         }
-    });
+    }
 </script>
