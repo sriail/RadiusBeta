@@ -387,55 +387,42 @@ private activateTab(tabId: string) {
 
     this.saveTabs();
 }
-
-        const activeTab = this.tabs.find(t => t.id === tabId);
-        if (activeTab) {
-            const urlInput = document.getElementById("url-input") as HTMLInputElement;
-            if (urlInput) urlInput.value = activeTab.url;
-        }
-
-        this.saveTabs();
-    }
-
-    private closeTab(tabId: string) {
-        if (this.tabs.length === 1) {
-            // Don't close the last tab, just reset it
-            const tab = this.tabs[0];
-            tab.url = "";
-            tab.title = "New Tab";
-            tab.favicon = "";
-            
-            const contentEl = document.getElementById(`content-${tab.id}`);
-            if (contentEl) {
-                contentEl.innerHTML = this.getNewTabPageHTML();
-                this.setupNewTabPageListeners(tab.id);
+ });
+private activateTab(tabId: string) {
+    this.tabs.forEach(tab => {
+        tab.isActive = tab.id === tabId;
+        
+        // Update tab styling
+        const tabEl = document.getElementById(`tab-${tab.id}`);
+        if (tabEl) {
+            if (tab.isActive) {
+                tabEl.className = tabEl.className.replace('bg-(--muted) mt-1 hover:bg-(--accent)', 'bg-(--card) shadow-sm z-10');
+            } else {
+                tabEl.className = tabEl.className.replace('bg-(--card) shadow-sm z-10', 'bg-(--muted) mt-1 hover:bg-(--accent)');
             }
-            
-            this.updateTabDisplay(tab.id);
-            this.saveTabs();
-            return;
         }
 
-        const tabIndex = this.tabs.findIndex(t => t.id === tabId);
-        const wasActive = this.tabs[tabIndex].isActive;
-
-        // Remove DOM elements
-        document.getElementById(`tab-${tabId}`)?.remove();
-        document.getElementById(`content-${tabId}`)?.remove();
-        this.iframeRefs.delete(tabId);
-
-        // Remove from array
-        this.tabs.splice(tabIndex, 1);
-
-        // Activate adjacent tab if closed tab was active
-        if (wasActive && this.tabs.length > 0) {
-            const newActiveIndex = Math.max(0, tabIndex - 1);
-            this.activateTab(this.tabs[newActiveIndex].id);
+        // FIXED: Update content visibility using display property
+        const contentEl = document.getElementById(`content-${tab.id}`) as HTMLElement;
+        if (contentEl) {
+            if (tab.isActive) {
+                contentEl.style.display = 'block';
+                contentEl.style.zIndex = '10';
+            } else {
+                contentEl.style.display = 'none';
+                contentEl.style.zIndex = '1';
+            }
         }
+    });
 
-        this.saveTabs();
+    const activeTab = this.tabs.find(t => t.id === tabId);
+    if (activeTab) {
+        const urlInput = document.getElementById("url-input") as HTMLInputElement;
+        if (urlInput) urlInput.value = activeTab.url;
     }
 
+    this.saveTabs();
+}
     private addTab() {
         const newTab: Tab = {
             id: `tab-${Date.now()}`,
