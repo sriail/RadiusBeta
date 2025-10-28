@@ -1,7 +1,6 @@
 ---
 import { readdir } from "node:fs";
 import { join as pathJoin } from "node:path";
-//import "@styles/global.css";
 import { ClientRouter } from "astro:transitions";
 import Loader from "@components/Loader.astro";
 import Header from "@components/Header.astro";
@@ -13,6 +12,8 @@ readdir(pathJoin("src", "styles", "themes"), { encoding: "utf-8" }, (err, files)
         await import(`../styles/themes/${name.replace(".css", "")}.css`);
     });
 });
+
+const isHomePage = Astro.url.pathname === "/";
 ---
 <!doctype html>
 <html lang="en">
@@ -30,17 +31,13 @@ readdir(pathJoin("src", "styles", "themes"), { encoding: "utf-8" }, (err, files)
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-
           gtag('config', 'G-FQFRWNVPMG');
         </script>
 	</head>
     <body class="h-full w-full bg-(--background) font-inter">
-        <Header />
-        <div class="h-full w-full fixed bg-(--background) text-(--foreground)">
+        {!isHomePage && <Header />}
+        <div class={`h-full w-full fixed bg-(--background) text-(--foreground) ${!isHomePage ? 'mt-14' : ''}`}>
             <slot />
         </div>
 	</body>
 </html>
-
-<style>
-</style>
