@@ -480,6 +480,12 @@ export class TabManager {
         // Render new content
         this.renderTabContent(tab);
         
+        const newContent = document.getElementById(`content-${tabId}`) as HTMLElement;
+        if (newContent) {
+        newContent.style.display = 'block';
+        newContent.style.zIndex = '10';
+    }
+        
         // Update display
         this.updateTabDisplay(tabId);
         
