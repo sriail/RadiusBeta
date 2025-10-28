@@ -8,7 +8,7 @@ const link = Astro.url.searchParams.get("redir");
 <div id="tabbed-browser" class="h-full w-full flex flex-col bg-(--background)">
     <!-- Tab Bar -->
     <div id="tab-bar" class="flex items-center bg-(--background) border-b border-(--border) h-10 px-1 overflow-x-auto">
-        <div id="tabs-container" class="flex-1 flex items-center h-full overflow-x-auto" style="scrollbar-width: none;">
+        <div id="tabs-container" class="flex-1 flex items-center h-full overflow-x-auto gap-0.5">
             <!-- Tabs will be inserted here dynamically -->
         </div>
         <button id="add-tab-btn" class="flex-shrink-0 flex items-center justify-center w-8 h-8 min-w-[32px] rounded-full hover:bg-(--muted) ml-1 transition-colors" title="New tab">
