@@ -387,13 +387,7 @@ private activateTab(tabId: string) {
 
     this.saveTabs();
 }
- });
-private activateTab(tabId: string) {
-    this.tabs.forEach(tab => {
-        tab.isActive = tab.id === tabId;
-        
-        // Update tab styling
-        const tabEl = document.getElementById(`tab-${tab.id}`);
+  private closeTab(tabId: string) {
         if (tabEl) {
             if (tab.isActive) {
                 tabEl.className = tabEl.className.replace('bg-(--muted) mt-1 hover:bg-(--accent)', 'bg-(--card) shadow-sm z-10');
