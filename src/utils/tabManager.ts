@@ -118,8 +118,11 @@ export class TabManager {
         tabElement.className = `flex-shrink-0 flex items-center justify-between h-9 px-3 relative rounded-t-lg mr-1 text-sm transition-all cursor-pointer group ${
             tab.isActive ? 'bg-(--card) shadow-sm z-10' : 'bg-(--muted) mt-1 hover:bg-(--accent)'
         }`;
-        tabElement.style.minWidth = "100px";
-        tabElement.style.maxWidth = "180px";
+
+        tabElement.style.minWidth = "40px";  // Just favicon + close button
+        tabElement.style.maxWidth = "240px"; // Full width tab
+        tabElement.style.flexShrink = "1";
+        tabElement.style.flexGrow = "1";
         tabElement.draggable = true;
 
         const tabContent = document.createElement("div");
