@@ -638,8 +638,15 @@ if (url.startsWith("about:")) {
         document.getElementById("nav-fullscreen")?.addEventListener("click", () => this.toggleFullscreen());
         document.getElementById("nav-settings")?.addEventListener("click", () => {
     this.openSettings();
-});
+            
+    window.addEventListener('message', (event) => {
+    if (event.data.type === 'close-settings') {
+        const settingsTab = this.tabs.find(t => t.url === "about:settings");
+        if (settingsTab) {
+            this.closeTab(settingsTab.id);
+        }
     }
+});
 
     private goBack() {
         const activeTab = this.tabs.find(t => t.isActive);
