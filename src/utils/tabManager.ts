@@ -352,7 +352,7 @@ export class TabManager {
         }
     }
 
- private activateTab(tabId: string) {
+private activateTab(tabId: string) {
     this.tabs.forEach(tab => {
         tab.isActive = tab.id === tabId;
         
