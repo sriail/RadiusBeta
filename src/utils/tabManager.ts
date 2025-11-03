@@ -187,10 +187,9 @@ export class TabManager {
         tabContentDiv.innerHTML = this.getSettingsPageHTML();
         this.setupSettingsPageListeners(tab.id);
         
-        // Update tab display with Google settings icon
+        // Update tab display with Google's settings cogwheel icon
         tab.title = "Settings";
-        // Use Google's actual settings icon from their CDN
-        tab.favicon = "https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png";
+        tab.favicon = "https://ssl.gstatic.com/images/branding/product/1x/gsa_settings_96dp.png";
         this.updateTabDisplay(tab.id);
     } else if (tab.url && !tab.url.startsWith("about:")) {
         const iframe = document.createElement("iframe");
@@ -346,9 +345,9 @@ export class TabManager {
         `;
     }
 
-  private getSettingsPageHTML(): string {
+ private getSettingsPageHTML(): string {
     return `
-        <div class="h-full w-full flex font-inter bg-(--background)">
+        <div class="h-full w-full flex font-inter">
             <div class="w-1/4 bg-(--background) flex mt-14">
                 <div class="h-full w-full flex flex-col font-inter p-4 pl-8 pt-8 gap-2">
                     <a href="#" data-settings-page="proxy" class="settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--secondary) hover:bg-(--secondary)/[0.8]">
@@ -364,13 +363,6 @@ export class TabManager {
                         </svg>
                         Appearance
                     </a>
-                    <a href="#" data-settings-page="cloaking" class="settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)">
-                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                        Cloaking
-                    </a>
                     <a href="#" data-settings-page="credits" class="settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)">
                         <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -380,35 +372,41 @@ export class TabManager {
                         </svg>
                         Credits
                     </a>
+                    <a href="#" data-settings-page="cloaking" class="settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)">
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        Cloaking
+                    </a>
                 </div>
             </div>
-            <div class="h-full mt-14 flex-grow px-12 py-8 flex flex-col overflow-auto">
+            <div class="h-full mt-14 flex-grow px-12 py-8 flex flex-col">
                 <div id="settings-content-area">
                     <h1 class="text-4xl font-semibold">Proxy</h1>
                     <div class="border-b border-(--border) w-full mb-4"></div>
-                    
                     <div class="w-full flex-grow">
                         <div>
                             <p>Proxy Switcher</p>
-                            <select id="settings-proxy" class="mt-2 w-full max-w-xs px-3 py-2 rounded-lg bg-(--card) border border-(--border) focus:border-(--primary) focus:outline-none text-sm">
-                                <option value="uv">Ultraviolet</option>
-                                <option value="sj">Scramjet</option>
+                            <select id="dropdownBox-pSwitcher" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="uv">Ultraviolet</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="sj">Scramjet</option>
                             </select>
                         </div>
                         <div class="mt-2">
                             <p>Transport</p>
-                            <select id="settings-transport" class="mt-2 w-full max-w-xs px-3 py-2 rounded-lg bg-(--card) border border-(--border) focus:border-(--primary) focus:outline-none text-sm">
-                                <option value="libcurl">Libcurl</option>
-                                <option value="epoxy">Epoxy</option>
+                            <select id="dropdownBox-tSwitcher" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="libcurl">Libcurl</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="epoxy">Epoxy</option>
                             </select>
                         </div>
                         <div class="mt-2">
                             <p>Search Engine</p>
-                            <select id="settings-search" class="mt-2 w-full max-w-xs px-3 py-2 rounded-lg bg-(--card) border border-(--border) focus:border-(--primary) focus:outline-none text-sm">
-                                <option value="https://www.google.com/search?q=">Google</option>
-                                <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
-                                <option value="https://www.bing.com/search?q=">Bing</option>
-                                <option value="https://search.brave.com/search?q=">Brave</option>
+                            <select id="dropdownBox-sSwitcher" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="https://www.google.com/search?q=">Google</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="https://www.bing.com/search?q=">Bing</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="https://search.brave.com/search?q=">Brave</option>
                             </select>
                         </div>
                         
@@ -416,9 +414,9 @@ export class TabManager {
                             <h2 class="text-2xl font-semibold mb-4">Tab Settings</h2>
                             <div class="mt-2">
                                 <p>Allow Tab Reordering <span class="text-xs opacity-60">(Experimental)</span></p>
-                                <select id="settings-tab-reorder" class="mt-2 w-full max-w-xs px-3 py-2 rounded-lg bg-(--card) border border-(--border) focus:border-(--primary) focus:outline-none text-sm">
-                                    <option value="true">Enabled</option>
-                                    <option value="false">Disabled</option>
+                                <select id="dropdownBox-tabReorder" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
+                                    <option class="w-full bg-(--accent) rounded-sm p-1" value="true">Enabled</option>
+                                    <option class="w-full bg-(--accent) rounded-sm p-1" value="false">Disabled</option>
                                 </select>
                             </div>
                         </div>
@@ -426,22 +424,29 @@ export class TabManager {
                         <div class="mt-2 w-80">
                             <div>
                                 <p>Wisp Server</p>
-                                <input type="text" id="settings-wisp" placeholder="Wisp server URL (EX: wss://radiusproxy.app/wisp/" class="mt-2 w-full px-3 py-2 rounded-lg bg-(--card) border border-(--border) focus:border-(--primary) focus:outline-none text-sm" />
+                                <input class="h-10 w-full rounded-md border border-(--border) px-3 py-2 text-sm" placeholder="Wisp server URL (EX: wss://radiusproxy.app/wisp/" id="wispServerSwitcher" />
+                                <div class="mt-2 hidden" id="adBlocking">
+                                    <p>Ad Blocking</p>
+                                    <select id="dropdownBox-adBlocking" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
+                                        <option class="w-full bg-(--accent) rounded-sm p-1" value="enabled">Enabled</option>
+                                        <option class="w-full bg-(--accent) rounded-sm p-1" value="disabled">Disabled</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="mt-2 mb-2 hidden" id="settings-wisp-info">
-                                <p class="text-blue-500" id="settings-wisp-info-text">Checking URL...</p>
+                            <div class="mt-2 mb-2 hidden" id="wispServerInfo">
+                                <p class="text-blue-500" id="wispServerInfo-inner">Checking URL...</p>
                             </div>
                             <div class="mt-2 flex flex-row gap-4">
-                                <button id="settings-wisp-save" class="px-4 py-2 rounded-lg bg-(--primary) text-(--primary-foreground) hover:bg-(--primary)/90 transition-colors flex items-center gap-2 text-sm font-medium">
-                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <button id="wispServerSave" class="bg-(--primary) hover:bg-(--primary)/90 cursor-pointer text-(--primary-foreground) inline-flex items-center jusitfy-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors h-10 px-4 py-2">
+                                    <svg class="text-(--primary-foreground) h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                                         <polyline points="17 21 17 13 7 13 7 21"></polyline>
                                         <polyline points="7 3 7 8 15 8"></polyline>
                                     </svg>
                                     Save Changes
                                 </button>
-                                <button id="settings-wisp-reset" class="px-4 py-2 rounded-lg bg-(--secondary) text-(--secondary-foreground) hover:bg-(--secondary)/80 transition-colors flex items-center gap-2 text-sm font-medium">
-                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <button id="wispServerReset" class="bg-(--primary) hover:bg-(--primary)/90 cursor-pointer text-(--primary-foreground) inline-flex items-center jusitfy-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors h-10 px-4 py-2">
+                                    <svg class="text-(--primary-foreground) h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <polyline points="23 4 23 10 17 10"></polyline>
                                         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                                     </svg>
@@ -480,109 +485,140 @@ export class TabManager {
 
 private setupSettingsPageListeners(tabId: string) {
     setTimeout(() => {
-        // Load current settings values
-        const proxySelect = document.getElementById("settings-proxy") as HTMLSelectElement;
-        const transportSelect = document.getElementById("settings-transport") as HTMLSelectElement;
-        const searchSelect = document.getElementById("settings-search") as HTMLSelectElement;
-        const tabReorderSelect = document.getElementById("settings-tab-reorder") as HTMLSelectElement;
-        const wispInput = document.getElementById("settings-wisp") as HTMLInputElement;
-        const wispInfo = document.getElementById("settings-wisp-info") as HTMLDivElement;
-        const wispInfoText = document.getElementById("settings-wisp-info-text") as HTMLParagraphElement;
-        const wispSaveBtn = document.getElementById("settings-wisp-save") as HTMLButtonElement;
-        const wispResetBtn = document.getElementById("settings-wisp-reset") as HTMLButtonElement;
+        const proxyEl = document.getElementById("dropdownBox-pSwitcher") as HTMLSelectElement;
+        const transportEl = document.getElementById("dropdownBox-tSwitcher") as HTMLSelectElement;
+        const seEl = document.getElementById("dropdownBox-sSwitcher") as HTMLSelectElement;
+        const tabReorderEl = document.getElementById("dropdownBox-tabReorder") as HTMLSelectElement;
+        const wispServerSwitcher = document.getElementById("wispServerSwitcher") as HTMLInputElement;
+        const wispServerInfo = document.getElementById("wispServerInfo") as HTMLElement;
+        const wispServerInfoInner = document.getElementById("wispServerInfo-inner") as HTMLParagraphElement;
+        const wispServerSave = document.getElementById("wispServerSave") as HTMLButtonElement;
+        const wispServerReset = document.getElementById("wispServerReset") as HTMLButtonElement;
+        const adBlocking = document.getElementById("adBlocking") as HTMLDivElement;
 
-        if (proxySelect) {
-            proxySelect.value = this.storage.getVal("proxy") || "uv";
-            proxySelect.addEventListener("change", () => {
-                this.storage.setVal("proxy", proxySelect.value);
+        // Proxy switcher
+        if (proxyEl) {
+            proxyEl.value = this.storage.getVal("proxy") || "uv";
+            proxyEl.addEventListener("change", () => {
                 if (this.settings) {
-                    this.settings.proxy(proxySelect.value as "uv" | "sj");
+                    this.settings.proxy(proxyEl.value as "uv" | "sj");
                 }
             });
         }
 
-        if (transportSelect) {
-            transportSelect.value = this.storage.getVal("transport") || "libcurl";
-            transportSelect.addEventListener("change", async () => {
-                this.storage.setVal("transport", transportSelect.value);
+        // Transport switcher
+        if (transportEl) {
+            transportEl.value = this.storage.getVal("transport") || "libcurl";
+            transportEl.addEventListener("change", async () => {
                 if (this.sw) {
-                    await this.sw.setTransport(transportSelect.value as "epoxy" | "libcurl");
+                    await this.sw.setTransport(transportEl.value as "epoxy" | "libcurl");
                 }
             });
         }
 
-        if (searchSelect) {
-            searchSelect.value = this.storage.getVal("searchEngine") || "https://www.google.com/search?q=";
-            searchSelect.addEventListener("change", () => {
-                this.storage.setVal("searchEngine", searchSelect.value);
+        // Search engine
+        if (seEl) {
+            seEl.value = this.storage.getVal("searchEngine") || "https://duckduckgo.com/?q=";
+            seEl.addEventListener("change", () => {
                 if (this.settings) {
-                    this.settings.searchEngine(searchSelect.value);
+                    this.settings.searchEngine(seEl.value);
                 }
             });
         }
 
-        if (tabReorderSelect) {
-            tabReorderSelect.value = this.storage.getVal("allowTabReordering") || "false";
-            tabReorderSelect.addEventListener("change", () => {
-                this.storage.setVal("allowTabReordering", tabReorderSelect.value);
+        // Tab reordering
+        if (tabReorderEl) {
+            tabReorderEl.value = this.storage.getVal("allowTabReordering") || "false";
+            tabReorderEl.addEventListener("change", () => {
+                this.storage.setVal("allowTabReordering", tabReorderEl.value);
             });
         }
 
-        if (wispInput) {
-            wispInput.value = this.storage.getVal("wispServer") || "";
+        // Wisp server
+        if (wispServerSwitcher) {
+            wispServerSwitcher.value = this.storage.getVal("wispServer");
         }
 
-        const resetWispInfo = (hide: boolean = true) => {
-            if (hide && wispInfo) wispInfo.classList.add("hidden");
-            if (wispInfoText) {
-                wispInfoText.innerText = "Checking URL...";
-                wispInfoText.classList.remove("text-red-500", "text-green-500");
-                wispInfoText.classList.add("text-blue-500");
+        const resetVal = `${(location.protocol === "https:" ? "wss://" : "ws://")}${location.host}/wisp/`;
+        
+        const reset = (hide: boolean = true) => {
+            if (hide && wispServerInfo) wispServerInfo.classList.add("hidden");
+            if (wispServerInfoInner) {
+                wispServerInfoInner.innerText = "Checking URL...";
+                wispServerInfoInner.classList.remove("text-red-500");
+                wispServerInfoInner.classList.remove("text-green-500");
             }
         };
 
-        if (wispSaveBtn) {
-            wispSaveBtn.addEventListener("click", async () => {
-                const server = wispInput.value;
-                if (wispInfo) wispInfo.classList.remove("hidden");
+        const adBlockingFunc = () => {
+            const adBlockingDropdown = document.getElementById("dropdownBox-adBlocking") as HTMLSelectElement;
+            if (adBlockingDropdown) {
+                adBlockingDropdown.addEventListener("change", () => {
+                    if (this.settings) {
+                        this.settings.adBlock(adBlockingDropdown.value === "enabled" ? true : false);
+                    }
+                });
 
-                if (!server.match(/^wss?:\/\/.*/)) {
-                    resetWispInfo(false);
-                    if (wispInfoText) {
-                        wispInfoText.innerText = "Invalid URL! URLs MUST start with wss:// or ws://";
-                        wispInfoText.classList.remove("text-blue-500", "text-green-500");
-                        wispInfoText.classList.add("text-red-500");
+                adBlockingDropdown.value = this.storage.getVal("adBlock") === "true" ? "enabled" : "disabled";
+
+                if (wispServerSwitcher && wispServerSwitcher.value === resetVal) {
+                    adBlocking?.classList.remove("hidden");
+                    if (this.settings) {
+                        this.settings.adBlock(true);
                     }
+                    adBlockingDropdown.value = "enabled";
                 } else {
-                    resetWispInfo(false);
-                    if (wispInfoText) {
-                        wispInfoText.innerText = "Wisp Server Set!";
-                        wispInfoText.classList.remove("text-blue-500", "text-red-500");
-                        wispInfoText.classList.add("text-green-500");
-                    }
-                    if (this.sw) {
-                        await this.sw.wispServer(server, true);
+                    adBlocking?.classList.add("hidden");
+                    if (this.settings) {
+                        this.settings.adBlock(false);
                     }
                 }
+            }
+        };
+        adBlockingFunc();
 
-                setTimeout(resetWispInfo, 4000);
+        if (wispServerSave) {
+            wispServerSave.addEventListener("click", async () => {
+                const server = wispServerSwitcher.value;
+                wispServerInfo?.classList.remove("hidden");
+
+                if (!server.match(/^wss?:\/\/.*/)) {
+                    reset(false);
+                    if (wispServerInfoInner) {
+                        wispServerInfoInner.innerText = "Invalid URL! \nURL's MUST start with wss:// or ws://";
+                        wispServerInfoInner.classList.add("text-red-500");
+                    }
+                } else {
+                    reset(false);
+                    if (wispServerInfoInner) {
+                        wispServerInfoInner.innerText = "Wisp Server Set!";
+                        wispServerInfoInner.classList.add("text-green-500");
+                    }
+                    if (this.sw) {
+                        await this.sw.wispServer(wispServerSwitcher.value, true);
+                    }
+                    adBlockingFunc();
+                }
+
+                setTimeout(reset, 4000);
             });
         }
 
-        if (wispResetBtn) {
-            wispResetBtn.addEventListener("click", async () => {
-                const resetVal = `${(location.protocol === "https:" ? "wss://" : "ws://")}${location.host}/wisp/`;
-                if (wispInfo) wispInfo.classList.remove("hidden");
-                if (wispInfoText) {
-                    wispInfoText.innerText = "Wisp Server Reset!";
-                    wispInfoText.classList.remove("text-blue-500", "text-red-500");
-                    wispInfoText.classList.add("text-green-500");
+        if (wispServerReset) {
+            wispServerReset.addEventListener("click", async () => {
+                wispServerInfo?.classList.remove("hidden");
+                if (wispServerInfoInner) {
+                    wispServerInfoInner.innerText = "Wisp Server Reset!";
+                    wispServerInfoInner.classList.add("text-green-500");
                 }
                 if (this.sw) {
                     await this.sw.wispServer(resetVal, true);
                 }
-                wispInput.value = this.storage.getVal("wispServer") || "";
-                setTimeout(resetWispInfo, 4000);
+                if (wispServerSwitcher) {
+                    wispServerSwitcher.value = this.storage.getVal("wispServer");
+                }
+                setTimeout(reset, 4000);
+                adBlockingFunc();
             });
         }
 
@@ -601,21 +637,62 @@ private setupSettingsPageListeners(tabId: string) {
                 
                 // Update content based on selected page
                 const contentArea = document.getElementById("settings-content-area");
-                if (contentArea && page === "credits") {
+                if (contentArea && page === "appearance") {
+                    contentArea.innerHTML = `
+                        <h1 class="text-4xl font-semibold">Appearance</h1>
+                        <div class="border-b border-(--border) w-full mb-4"></div>
+                        <div class="w-full flex-grow">
+                            <div>
+                                <p>Themes</p>
+                                <select id="dropdownBox-themeSwitcher" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
+                                    <option class="w-full bg-(--accent) rounded-sm p-1" value="default">Default</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                    
+                    const themeDropdown = document.getElementById("dropdownBox-themeSwitcher") as HTMLSelectElement;
+                    if (themeDropdown && this.settings) {
+                        themeDropdown.value = this.storage.getVal('theme');
+                        themeDropdown.addEventListener("change", () => {
+                            if (this.settings) {
+                                this.settings.theme(themeDropdown.value);
+                            }
+                        });
+                    }
+                } else if (contentArea && page === "credits") {
                     contentArea.innerHTML = `
                         <h1 class="text-4xl font-semibold">Credits</h1>
                         <div class="border-b border-(--border) w-full mb-4"></div>
                         <div class="w-full flex-grow">
-                            <p>Radius Browser - Built with ❤️</p>
+                            <div>
+                                <p>Thanks to all the wonderful people who have contributed!</p>
+                                <ul class="list-disc pl-5 mt-2 font-bold">
+                                    <li><a class="underline hover:text-(--accent) transition-colors duration-300" href="https://github.com/hyperficial" target="_blank" rel="noopener noreferrer">Owski</a></li>
+                                    <li><a href="https://github.com/proudparrot2" target="_blank" rel="noopener noreferrer" class="underline hover:text-(--accent) transition-colors duration-300">ProudParrot</a></li>
+                                    <li><a class="underline hover:text-(--accent) transition-colors duration-300" href="https://github.com/motortruck1221" target="_blank" rel="noopener noreferrer">MotorTruck1221</a></li>
+                                    <li><a href="https://mercurywork.shop" target="_blank" rel="noopener noreferrer" class="underline hover:text-(--accent) transition-colors duration-300">The wonderful people over at MercuryWorkshop</a></li>
+                                    <li><a href="https://github.com/titaniumnetwork-dev" target="_blank" rel="noopener noreferrer" class="underline hover:text-(--accent) transition-colors duration-300">Everyone over at TitaniumNetwork</a></li>
+                                    <li><a href="https://github.com/RadiusProxy/Radius/graphs/contributors" target="_blank" rel="noopener noreferrer" class="underline hover:text-(--accent) transition-colors duration-300">And Everyone else who has contributed!</a></li>
+                                </ul>
+                            </div>
+                            <div class="border-t-2 border-(--border) mt-2">
+                                <p class="mt-2">Projects that we use:</p>
+                                <ul class="list-disc pl-5 mt-2 font-bold">
+                                    <li><a href="https://github.com/titaniumnetwork-dev/ultraviolet" target="_blank" rel="noopener noreferrer" class="underline transition-colors duration-300 hover:text-(--accent)">Ultraviolet</a></li>
+                                    <li><a href="https://github.com/mercuryworkshop/scramjet" target="_blank" rel="noopener noreferrer" class="underline transition-colors duration-300 hover:text-(--accent)">Scramjet</a></li>
+                                    <li><a href="https://github.com/ading2210/libcurl.js" target="_blank" rel="noopener noreferrer" class="underline transition-colors duration-300 hover:text-(--accent)">Libcurl.js</a></li>
+                                    <li><a href="https://github.com/mercuryworkshop/epoxy-tls" target="_blank" rel="noopener noreferrer" class="underline transition-colors duration-300 hover:text-(--accent)">Epoxy TLS</a></li>
+                                </ul>
+                            </div>
                         </div>
                     `;
                 }
-                // Add more pages as needed
             });
         });
     }, 100);
 }
-
+    
     private handleIframeLoad(tabId: string) {
         const tab = this.tabs.find(t => t.id === tabId);
         const iframe = this.iframeRefs.get(tabId);
