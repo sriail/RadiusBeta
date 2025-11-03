@@ -339,6 +339,99 @@ export class TabManager {
         `;
     }
 
+    private getSettingsPageHTML(): string {
+    return `
+        <div class="h-full w-full flex font-inter bg-(--background)">
+            <div class="w-1/4 bg-(--background) flex">
+                <div class="h-full w-full flex flex-col font-inter p-4 pl-8 pt-8 gap-2">
+                    <a href="#" data-settings-page="proxy" class="settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--secondary) hover:bg-(--secondary)/[0.8]">
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        Proxy
+                    </a>
+                    <a href="#" data-settings-page="appearance" class="settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)">
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                        </svg>
+                        Appearance
+                    </a>
+                    <a href="#" data-settings-page="cloaking" class="settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)">
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        Cloaking
+                    </a>
+                    <a href="#" data-settings-page="credits" class="settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)">
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        Credits
+                    </a>
+                </div>
+            </div>
+            <div class="h-full flex-grow px-12 py-8 flex flex-col overflow-auto">
+                <div id="settings-content-area">
+                    <h1 class="text-4xl font-semibold mb-2">Proxy</h1>
+                    <div class="border-b border-(--border) w-full mb-4"></div>
+                    
+                    <div class="w-full flex-grow">
+                        <div>
+                            <p class="mb-2">Proxy Switcher</p>
+                            <select id="settings-proxy" class="w-80 px-4 py-2 rounded-lg bg-(--card) border border-(--border) focus:border-(--primary) focus:outline-none">
+                                <option value="uv">Ultraviolet</option>
+                                <option value="sj">Scramjet</option>
+                            </select>
+                        </div>
+                        <div class="mt-4">
+                            <p class="mb-2">Transport</p>
+                            <select id="settings-transport" class="w-80 px-4 py-2 rounded-lg bg-(--card) border border-(--border) focus:border-(--primary) focus:outline-none">
+                                <option value="libcurl">Libcurl</option>
+                                <option value="epoxy">Epoxy</option>
+                            </select>
+                        </div>
+                        <div class="mt-4">
+                            <p class="mb-2">Search Engine</p>
+                            <select id="settings-search" class="w-80 px-4 py-2 rounded-lg bg-(--card) border border-(--border) focus:border-(--primary) focus:outline-none">
+                                <option value="https://www.google.com/search?q=">Google</option>
+                                <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+                                <option value="https://www.bing.com/search?q=">Bing</option>
+                                <option value="https://search.brave.com/search?q=">Brave</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mt-6 pt-6 border-t border-(--border)">
+                            <h2 class="text-2xl font-semibold mb-4">Tab Settings</h2>
+                            <div class="mt-2">
+                                <p class="mb-2">Allow Tab Reordering <span class="text-xs opacity-60">(Experimental)</span></p>
+                                <select id="settings-tab-reorder" class="w-80 px-4 py-2 rounded-lg bg-(--card) border border-(--border) focus:border-(--primary) focus:outline-none">
+                                    <option value="true">Enabled</option>
+                                    <option value="false">Disabled</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <p class="mb-2">Wisp Server</p>
+                            <input type="text" id="settings-wisp" placeholder="wss://example.com/wisp/" class="w-80 px-4 py-2 rounded-lg bg-(--card) border border-(--border) focus:border-(--primary) focus:outline-none" />
+                        </div>
+                        <div class="mt-4">
+                            <button id="settings-wisp-save" class="px-6 py-2 rounded-lg bg-(--primary) hover:bg-(--primary)/[0.8] text-(--primary-foreground) font-medium transition-colors">
+                                Save Wisp Server
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
     private setupNewTabPageListeners(tabId: string) {
         setTimeout(() => {
             const searchInput = document.getElementById("new-tab-search") as HTMLInputElement;
