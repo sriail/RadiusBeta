@@ -168,42 +168,47 @@ export class TabManager {
         setTimeout(() => this.updateTabSizes(), 50);
     }
 
-    private renderTabContent(tab: Tab) {
-        const contentArea = document.getElementById("tab-content-area");
-        if (!contentArea) return;
+  private renderTabContent(tab: Tab) {
+    const contentArea = document.getElementById("tab-content-area");
+    if (!contentArea) return;
 
-        const tabContentDiv = document.createElement("div");
-        tabContentDiv.id = `content-${tab.id}`;
-        tabContentDiv.style.position = 'absolute';
-        tabContentDiv.style.top = '0';
-        tabContentDiv.style.left = '0';
-        tabContentDiv.style.width = '100%';
-        tabContentDiv.style.height = '100%';
-        tabContentDiv.style.display = tab.isActive ? 'block' : 'none';
-        tabContentDiv.style.zIndex = tab.isActive ? '10' : '1';
+    const tabContentDiv = document.createElement("div");
+    tabContentDiv.id = `content-${tab.id}`;
+    tabContentDiv.style.position = 'absolute';
+    tabContentDiv.style.top = '0';
+    tabContentDiv.style.left = '0';
+    tabContentDiv.style.width = '100%';
+    tabContentDiv.style.height = '100%';
+    tabContentDiv.style.display = tab.isActive ? 'block' : 'none';
+    tabContentDiv.style.zIndex = tab.isActive ? '10' : '1';
 
-        if (tab.url && !tab.url.startsWith("about:")) {
-            const iframe = document.createElement("iframe");
-            iframe.id = `iframe-${tab.id}`;
-            iframe.className = "w-full h-full border-0";
-            iframe.src = this.sw!.encodeURL(tab.url);
-            iframe.sandbox.add("allow-same-origin", "allow-scripts", "allow-forms", "allow-popups", "allow-presentation", "allow-top-navigation-by-user-activation", "allow-pointer-lock");
-            
-            iframe.onload = () => this.handleIframeLoad(tab.id);
-            
-            this.iframeRefs.set(tab.id, iframe);
-            tabContentDiv.appendChild(iframe);
-        } else if (tab.url === "about:settings") {
-            window.location.href = "/settings";
-            return;
-        } else {
-            tabContentDiv.innerHTML = this.getNewTabPageHTML();
-            this.setupNewTabPageListeners(tab.id);
-        }
-
-        contentArea.appendChild(tabContentDiv);
+    if (tab.url === "about:settings") {
+        // Render settings page directly
+        tabContentDiv.innerHTML = this.getSettingsPageHTML();
+        this.setupSettingsPageListeners(tab.id);
+        
+        // Update tab display
+        tab.title = "Settings";
+        tab.favicon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='3'%3E%3C/circle%3E%3Cpath d='M12 1v6m0 6v6M5 12h6m6 0h6'/%3E%3C/svg%3E";
+        this.updateTabDisplay(tab.id);
+    } else if (tab.url && !tab.url.startsWith("about:")) {
+        const iframe = document.createElement("iframe");
+        iframe.id = `iframe-${tab.id}`;
+        iframe.className = "w-full h-full border-0";
+        iframe.src = this.sw!.encodeURL(tab.url);
+        iframe.sandbox.add("allow-same-origin", "allow-scripts", "allow-forms", "allow-popups", "allow-presentation", "allow-top-navigation-by-user-activation", "allow-pointer-lock");
+        
+        iframe.onload = () => this.handleIframeLoad(tab.id);
+        
+        this.iframeRefs.set(tab.id, iframe);
+        tabContentDiv.appendChild(iframe);
+    } else {
+        tabContentDiv.innerHTML = this.getNewTabPageHTML();
+        this.setupNewTabPageListeners(tab.id);
     }
 
+    contentArea.appendChild(tabContentDiv);
+}
         private updateTabSizes() {
         const tabsContainer = document.getElementById("tabs-container");
         if (!tabsContainer) return;
@@ -454,6 +459,112 @@ export class TabManager {
         }, 100);
     }
 
+    private setupSettingsPageListeners(tabId: string) {
+    setTimeout(() => {
+        // Load current settings values
+        const proxySelect = document.getElementById("settings-proxy") as HTMLSelectElement;
+        const transportSelect = document.getElementById("settings-transport") as HTMLSelectElement;
+        const searchSelect = document.getElementById("settings-search") as HTMLSelectElement;
+        const tabReorderSelect = document.getElementById("settings-tab-reorder") as HTMLSelectElement;
+        const wispInput = document.getElementById("settings-wisp") as HTMLInputElement;
+        const wispSaveBtn = document.getElementById("settings-wisp-save") as HTMLButtonElement;
+
+        if (proxySelect) {
+            proxySelect.value = this.storage.getVal("proxy") || "uv";
+            proxySelect.addEventListener("change", () => {
+                this.storage.setVal("proxy", proxySelect.value);
+            });
+        }
+
+        if (transportSelect) {
+            transportSelect.value = this.storage.getVal("transport") || "libcurl";
+            transportSelect.addEventListener("change", async () => {
+                this.storage.setVal("transport", transportSelect.value);
+                if (this.sw) {
+                    await this.sw.setTransport(transportSelect.value as "epoxy" | "libcurl");
+                }
+            });
+        }
+
+        if (searchSelect) {
+            searchSelect.value = this.storage.getVal("searchEngine") || "https://www.google.com/search?q=";
+            searchSelect.addEventListener("change", () => {
+                this.storage.setVal("searchEngine", searchSelect.value);
+            });
+        }
+
+        if (tabReorderSelect) {
+            tabReorderSelect.value = this.storage.getVal("allowTabReordering") || "false";
+            tabReorderSelect.addEventListener("change", () => {
+                this.storage.setVal("allowTabReordering", tabReorderSelect.value);
+            });
+        }
+
+        if (wispInput) {
+            wispInput.value = this.storage.getVal("wispServerUrl") || "";
+        }
+
+        if (wispSaveBtn) {
+            wispSaveBtn.addEventListener("click", async () => {
+                const wispUrl = wispInput.value.trim();
+                if (wispUrl) {
+                    this.storage.setVal("wispServerUrl", wispUrl);
+                    alert("Wisp server saved! Reload the page for changes to take effect.");
+                }
+            });
+        }
+
+        // Navigation between settings pages
+        const navLinks = document.querySelectorAll(".settings-nav-link");
+        navLinks.forEach(link => {
+            link.addEventListener("click", (e) => {
+                e.preventDefault();
+                const page = (link as HTMLElement).dataset.settingsPage;
+                
+                // Update active state
+                navLinks.forEach(l => {
+                    l.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)";
+                });
+                link.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--secondary) hover:bg-(--secondary)/[0.8]";
+                
+                // Load different content based on page (you can expand this)
+                const contentArea = document.getElementById("settings-content-area");
+                if (contentArea && page === "appearance") {
+                    contentArea.innerHTML = `
+                        <h1 class="text-4xl font-semibold mb-2">Appearance</h1>
+                        <div class="border-b border-(--border) w-full mb-4"></div>
+                        <div class="w-full flex-grow">
+                            <div>
+                                <p class="mb-2">Theme</p>
+                                <select id="settings-theme" class="w-80 px-4 py-2 rounded-lg bg-(--card) border border-(--border) focus:border-(--primary) focus:outline-none">
+                                    <option value="default">Default</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Setup theme switcher
+                    const themeSelect = document.getElementById("settings-theme") as HTMLSelectElement;
+                    if (themeSelect && this.settings) {
+                        themeSelect.value = this.storage.getVal("theme") || "default";
+                        themeSelect.addEventListener("change", () => {
+                            this.settings?.theme(themeSelect.value);
+                        });
+                    }
+                } else if (contentArea && page === "credits") {
+                    contentArea.innerHTML = `
+                        <h1 class="text-4xl font-semibold mb-2">Credits</h1>
+                        <div class="border-b border-(--border) w-full mb-4"></div>
+                        <div class="w-full flex-grow">
+                            <p>Radius Browser - Built with ❤️</p>
+                        </div>
+                    `;
+                }
+            });
+        });
+    }, 100);
+}
+
     private handleIframeLoad(tabId: string) {
         const tab = this.tabs.find(t => t.id === tabId);
         const iframe = this.iframeRefs.get(tabId);
@@ -616,29 +727,17 @@ export class TabManager {
         }
     }
 
-    private navigateTab(tabId: string, input: string) {
-        const tab = this.tabs.find(t => t.id === tabId);
-        if (!tab) return;
+  private navigateTab(tabId: string, input: string) {
+    const tab = this.tabs.find(t => t.id === tabId);
+    if (!tab) return;
 
-        let url = input.trim();
-        const isURL = url.includes(".") && !url.includes(" ") && !url.startsWith("about:");
-        
-        if (url.startsWith("about:")) {
-            if (url === "about:settings") {
-                window.location.href = "/settings";
-                return;
-            }
-        } else if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            if (isURL) {
-                url = `https://${url}`;
-            } else {
-                const searchEngine = this.storage.getVal("searchEngine") || "https://www.google.com/search?q=";
-                url = `${searchEngine}${encodeURIComponent(url)}`;
-            }
-        }
-
+    let url = input.trim();
+    const isURL = url.includes(".") && !url.includes(" ") && !url.startsWith("about:");
+    
+    if (url.startsWith("about:")) {
+        // Handle about: pages within tabs
         tab.url = url;
-        tab.title = "Loading...";
+        tab.title = url === "about:settings" ? "Settings" : "About Page";
         
         const oldContent = document.getElementById(`content-${tabId}`);
         if (oldContent) oldContent.remove();
@@ -657,8 +756,38 @@ export class TabManager {
         if (urlInput) urlInput.value = url;
 
         this.saveTabs();
+        return;
+    } else if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        if (isURL) {
+            url = `https://${url}`;
+        } else {
+            const searchEngine = this.storage.getVal("searchEngine") || "https://www.google.com/search?q=";
+            url = `${searchEngine}${encodeURIComponent(url)}`;
+        }
     }
 
+    tab.url = url;
+    tab.title = "Loading...";
+    
+    const oldContent = document.getElementById(`content-${tabId}`);
+    if (oldContent) oldContent.remove();
+
+    this.renderTabContent(tab);
+    
+    const newContent = document.getElementById(`content-${tabId}`) as HTMLElement;
+    if (newContent) {
+        newContent.style.display = 'block';
+        newContent.style.zIndex = '10';
+    }
+    
+    this.updateTabDisplay(tabId);
+    
+    const urlInput = document.getElementById("url-input") as HTMLInputElement;
+    if (urlInput) urlInput.value = url;
+
+    this.saveTabs();
+}
+    
     private setupEventListeners() {
         document.getElementById("add-tab-btn")?.addEventListener("click", () => this.addTab());
 
@@ -678,9 +807,12 @@ export class TabManager {
         document.getElementById("nav-bookmark")?.addEventListener("click", () => this.addBookmark());
         document.getElementById("nav-fullscreen")?.addEventListener("click", () => this.toggleFullscreen());
         document.getElementById("nav-settings")?.addEventListener("click", () => {
-            window.location.href = "/settings";
-        });
+    // Open settings in current tab
+    const activeTab = this.tabs.find(t => t.isActive);
+    if (activeTab) {
+        this.navigateTab(activeTab.id, "about:settings");
     }
+});
 
     private goBack() {
         const activeTab = this.tabs.find(t => t.isActive);
