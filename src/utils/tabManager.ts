@@ -788,31 +788,34 @@ export class TabManager {
     this.saveTabs();
 }
     
-    private setupEventListeners() {
-        document.getElementById("add-tab-btn")?.addEventListener("click", () => this.addTab());
+ private setupEventListeners() {
+    document.getElementById("add-tab-btn")?.addEventListener("click", () => this.addTab());
 
-        const urlInput = document.getElementById("url-input") as HTMLInputElement;
-        urlInput?.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                const activeTab = this.tabs.find(t => t.isActive);
-                if (activeTab) {
-                    this.navigateTab(activeTab.id, urlInput.value);
-                }
+    const urlInput = document.getElementById("url-input") as HTMLInputElement;
+    urlInput?.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            const activeTab = this.tabs.find(t => t.isActive);
+            if (activeTab) {
+                this.navigateTab(activeTab.id, urlInput.value);
             }
-        });
+        }
+    });
 
-        document.getElementById("nav-back")?.addEventListener("click", () => this.goBack());
-        document.getElementById("nav-forward")?.addEventListener("click", () => this.goForward());
-        document.getElementById("nav-refresh")?.addEventListener("click", () => this.refresh());
-        document.getElementById("nav-bookmark")?.addEventListener("click", () => this.addBookmark());
-        document.getElementById("nav-fullscreen")?.addEventListener("click", () => this.toggleFullscreen());
-        document.getElementById("nav-settings")?.addEventListener("click", () => {
-    // Open settings in current tab
-    const activeTab = this.tabs.find(t => t.isActive);
-    if (activeTab) {
-        this.navigateTab(activeTab.id, "about:settings");
-    }
-});
+    document.getElementById("nav-back")?.addEventListener("click", () => this.goBack());
+    document.getElementById("nav-forward")?.addEventListener("click", () => this.goForward());
+    document.getElementById("nav-refresh")?.addEventListener("click", () => this.refresh());
+    document.getElementById("nav-bookmark")?.addEventListener("click", () => this.addBookmark());
+    document.getElementById("nav-fullscreen")?.addEventListener("click", () => this.toggleFullscreen());
+    
+    // This should be INSIDE the setupEventListeners method
+    document.getElementById("nav-settings")?.addEventListener("click", () => {
+        // Open settings in current tab
+        const activeTab = this.tabs.find(t => t.isActive);
+        if (activeTab) {
+            this.navigateTab(activeTab.id, "about:settings");
+        }
+    });
+}
 
     private goBack() {
         const activeTab = this.tabs.find(t => t.isActive);
