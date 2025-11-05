@@ -420,44 +420,6 @@ private setupSettingsPageListeners(tabId: string) {
         const wispServerReset = document.getElementById("wispServerReset") as HTMLButtonElement;
         const adBlocking = document.getElementById("adBlocking") as HTMLDivElement;
 
-         const handleNavClick = (e: Event) => {
-            e.preventDefault();
-            const target = e.currentTarget as HTMLElement;
-            const page = target.dataset.settingsPage;
-            
-            if (!page) return;
-            
-            // Update active state for all nav links
-            const allNavLinks = document.querySelectorAll(".settings-nav-link");
-            allNavLinks.forEach(link => {
-                link.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)";
-            });
-            target.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--secondary) hover:bg-(--secondary)/[0.8]";
-            
-            // Update content based on selected page
-            const contentArea = document.getElementById("settings-content-area");
-            if (!contentArea) return;
-
-            if (page === "proxy") {
-                contentArea.innerHTML = this.getProxySettingsHTML();
-                setTimeout(() => this.setupProxyPageListeners(), 50);
-            } else if (page === "appearance") {
-                contentArea.innerHTML = this.getAppearanceSettingsHTML();
-                setTimeout(() => this.setupAppearancePageListeners(), 50);
-            } else if (page === "credits") {
-                contentArea.innerHTML = this.getCreditsHTML();
-            } else if (page === "cloaking") {
-                contentArea.innerHTML = this.getCloakingHTML();
-                setTimeout(() => this.setupCloakingPageListeners(), 50);
-            }
-        };
-
-        // Add click listeners to navigation links
-        const navLinks = document.querySelectorAll(".settings-nav-link");
-        navLinks.forEach(link => {
-            link.addEventListener("click", handleNavClick);
-        });
-
         // Proxy switcher
         if (proxyEl) {
             proxyEl.value = this.storage.getVal("proxy") || "uv";
@@ -498,7 +460,7 @@ private setupSettingsPageListeners(tabId: string) {
 
         // Wisp server
         if (wispServerSwitcher) {
-            wispServerSwitcher.value = this.storage.getVal("wispServer");
+            wispServerSwitcher.value = this.storage.getVal("wispServer") || "";
         }
 
         const resetVal = `${(location.protocol === "https:" ? "wss://" : "ws://")}${location.host}/wisp/`;
@@ -507,8 +469,7 @@ private setupSettingsPageListeners(tabId: string) {
             if (hide && wispServerInfo) wispServerInfo.classList.add("hidden");
             if (wispServerInfoInner) {
                 wispServerInfoInner.innerText = "Checking URL...";
-                wispServerInfoInner.classList.remove("text-red-500");
-                wispServerInfoInner.classList.remove("text-green-500");
+                wispServerInfoInner.classList.remove("text-red-500", "text-green-500");
             }
         };
 
@@ -577,74 +538,50 @@ private setupSettingsPageListeners(tabId: string) {
                     await this.sw.wispServer(resetVal, true);
                 }
                 if (wispServerSwitcher) {
-                    wispServerSwitcher.value = this.storage.getVal("wispServer");
+                    wispServerSwitcher.value = this.storage.getVal("wispServer") || "";
                 }
                 setTimeout(reset, 4000);
                 adBlockingFunc();
             });
         }
-                
-                // Update active state
-                navLinks.forEach(l => {
-                    l.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)";
-                });
-                link.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--secondary) hover:bg-(--secondary)/[0.8]";
 
-                
-                // Update content based on selected page
-                const contentArea = document.getElementById("settings-content-area");
-                if (contentArea && page === "appearance") {
-                    contentArea.innerHTML = `
-                        <h1 class="text-4xl font-semibold">Appearance</h1>
-                        <div class="border-b border-(--border) w-full mb-4"></div>
-                        <div class="w-full flex-grow">
-                            <div>
-                                <p>Themes</p>
-                                <select id="dropdownBox-themeSwitcher" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
-                                    <option class="w-full bg-(--accent) rounded-sm p-1" value="default">Default</option>
-                                </select>
-                            </div>
-                        </div>
-                    `;
-                    
-                    const themeDropdown = document.getElementById("dropdownBox-themeSwitcher") as HTMLSelectElement;
-                    if (themeDropdown && this.settings) {
-                        themeDropdown.value = this.storage.getVal('theme');
-                        themeDropdown.addEventListener("change", () => {
-                            if (this.settings) {
-                                this.settings.theme(themeDropdown.value);
-                            }
-                        });
-                    }
-                } else if (contentArea && page === "credits") {
-                    contentArea.innerHTML = `
-                        <h1 class="text-4xl font-semibold">Credits</h1>
-                        <div class="border-b border-(--border) w-full mb-4"></div>
-                        <div class="w-full flex-grow">
-                            <div>
-                                <p>Thanks to all the wonderful people who have contributed!</p>
-                                <ul class="list-disc pl-5 mt-2 font-bold">
-                                    <li><a class="underline hover:text-(--accent) transition-colors duration-300" href="https://github.com/hyperficial" target="_blank" rel="noopener noreferrer">Owski</a></li>
-                                    <li><a href="https://github.com/proudparrot2" target="_blank" rel="noopener noreferrer" class="underline hover:text-(--accent) transition-colors duration-300">ProudParrot</a></li>
-                                    <li><a class="underline hover:text-(--accent) transition-colors duration-300" href="https://github.com/motortruck1221" target="_blank" rel="noopener noreferrer">MotorTruck1221</a></li>
-                                    <li><a href="https://mercurywork.shop" target="_blank" rel="noopener noreferrer" class="underline hover:text-(--accent) transition-colors duration-300">The wonderful people over at MercuryWorkshop</a></li>
-                                    <li><a href="https://github.com/titaniumnetwork-dev" target="_blank" rel="noopener noreferrer" class="underline hover:text-(--accent) transition-colors duration-300">Everyone over at TitaniumNetwork</a></li>
-                                    <li><a href="https://github.com/RadiusProxy/Radius/graphs/contributors" target="_blank" rel="noopener noreferrer" class="underline hover:text-(--accent) transition-colors duration-300">And Everyone else who has contributed!</a></li>
-                                </ul>
-                            </div>
-                            <div class="border-t-2 border-(--border) mt-2">
-                                <p class="mt-2">Projects that we use:</p>
-                                <ul class="list-disc pl-5 mt-2 font-bold">
-                                    <li><a href="https://github.com/titaniumnetwork-dev/ultraviolet" target="_blank" rel="noopener noreferrer" class="underline transition-colors duration-300 hover:text-(--accent)">Ultraviolet</a></li>
-                                    <li><a href="https://github.com/mercuryworkshop/scramjet" target="_blank" rel="noopener noreferrer" class="underline transition-colors duration-300 hover:text-(--accent)">Scramjet</a></li>
-                                    <li><a href="https://github.com/ading2210/libcurl.js" target="_blank" rel="noopener noreferrer" class="underline transition-colors duration-300 hover:text-(--accent)">Libcurl.js</a></li>
-                                    <li><a href="https://github.com/mercuryworkshop/epoxy-tls" target="_blank" rel="noopener noreferrer" class="underline transition-colors duration-300 hover:text-(--accent)">Epoxy TLS</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    `;
-                }
+        // Fixed navigation between settings pages - use event delegation
+        const handleNavClick = (e: Event) => {
+            e.preventDefault();
+            const target = e.currentTarget as HTMLElement;
+            const page = target.dataset.settingsPage;
+            
+            if (!page) return;
+            
+            // Update active state for all nav links
+            const allNavLinks = document.querySelectorAll(".settings-nav-link");
+            allNavLinks.forEach(link => {
+                link.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)";
             });
+            target.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--secondary) hover:bg-(--secondary)/[0.8]";
+            
+            // Update content based on selected page
+            const contentArea = document.getElementById("settings-content-area");
+            if (!contentArea) return;
+
+            if (page === "proxy") {
+                contentArea.innerHTML = this.getProxySettingsHTML();
+                setTimeout(() => this.setupProxyPageListeners(), 50);
+            } else if (page === "appearance") {
+                contentArea.innerHTML = this.getAppearanceSettingsHTML();
+                setTimeout(() => this.setupAppearancePageListeners(), 50);
+            } else if (page === "credits") {
+                contentArea.innerHTML = this.getCreditsHTML();
+            } else if (page === "cloaking") {
+                contentArea.innerHTML = this.getCloakingHTML();
+                setTimeout(() => this.setupCloakingPageListeners(), 50);
+            }
+        };
+
+        // Add click listeners to navigation links
+        const navLinks = document.querySelectorAll(".settings-nav-link");
+        navLinks.forEach(link => {
+            link.addEventListener("click", handleNavClick);
         });
     }, 100);
 }
