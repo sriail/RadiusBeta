@@ -37,21 +37,13 @@ export class TabManager {
     private bookmarkStorage: StoreManager<"radius||bookmarks">;
     private bareClient: BareClient;
     private isFullscreen = false;
-    // Properly formatted Material Symbols settings icon
-    private settingsIconUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23888888' d='M13.875 22h-3.75q-.375 0-.65-.25t-.325-.625l-.3-2.325q-.325-.125-.612-.3t-.563-.375l-2.175.9q-.35.125-.7.025t-.55-.425L2.4 15.4q-.2-.325-.125-.7t.375-.6l1.875-1.425Q4.5 12.5 4.5 12.337v-.674q0-.163.025-.338L2.65 9.9q-.3-.225-.375-.6t.125-.7l1.85-3.225q.175-.35.537-.438t.713.038l2.175.9q.275-.2.575-.375t.6-.3l.3-2.325q.05-.375.325-.625t.65-.25h3.75q.375 0 .65.25t.325.625l.3 2.325q.325.125.613.3t.562.375l2.175-.9q.35-.125.7-.025t.55.425L21.6 8.6q.2.325.125.7t-.375.6l-1.875 1.425q.025.175.025.338v.674q0 .163-.05.338l1.875 1.425q.3.225.375.6t-.125.7l-1.85 3.2q-.2.325-.562.438t-.713-.013l-2.125-.9q-.275.2-.575.375t-.6.3l-.3 2.325q-.05.375-.325.625t-.65.25M12 15.5q1.45 0 2.475-1.025T15.5 12t-1.025-2.475T12 8.5T9.525 9.525T8.5 12t1.025 2.475T12 15.5'/%3E%3C/svg%3E";
 
     constructor() {
         this.storage = new StoreManager<"radius||tabs">("radius||tabs");
         this.bookmarkStorage = new StoreManager<"radius||bookmarks">("radius||bookmarks");
         this.bareClient = new BareClient();
-        this.preloadSettingsIcon();
     }
 
-    private preloadSettingsIcon() {
-        const img = new Image();
-        img.src = this.settingsIconUrl;
-    }
-     
     async init() {
         this.sw = SW.getInstance().next().value!;
         this.settings = await Settings.getInstance();
@@ -353,32 +345,116 @@ export class TabManager {
         `;
     }
 
-private getSettingsPageHTML(): string {
+ private getSettingsPageHTML(): string {
     return `
         <div class="h-full w-full flex font-inter">
-            <div class="w-1/4 bg-(--background) flex mt-14 overflow-hidden">
-                <div class="h-full w-full flex flex-col font-inter p-4 pl-8 pt-8 gap-2 overflow-y-auto">
+            <div class="w-1/4 bg-(--background) flex mt-14">
+                <div class="h-full w-full flex flex-col font-inter p-4 pl-8 pt-8 gap-2">
                     <a href="#" data-settings-page="proxy" class="settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--secondary) hover:bg-(--secondary)/[0.8]">
-                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2M9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9zm9 14H6V10h12zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2s-2 .9-2 2s.9 2 2 2"/></svg>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
                         Proxy
                     </a>
                     <a href="#" data-settings-page="appearance" class="settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)">
-                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22q-2.05 0-3.875-.788t-3.187-2.15t-2.15-3.187T2 12q0-2.075.788-3.887t2.15-3.175T8.124 2.788T12 2q.425 0 .713.288T13 3v2q0 .825.588 1.413T15 7h2q.425 0 .713.288T18 8v1.5q0 .425.288.713T19 10.5q.425 0 .713-.288T20 9.5V8q0-1.25-.875-2.125T17 5h-2q0-1.25-.875-2.125T12 2Q9.075 2 6.537 4.15T4 9.25q0 1.725.55 3.238t1.55 2.762t2.4 2.013T12 18q.425 0 .713.288T13 19q0 .425-.288.713T12 20m0 2q-.425 0-.712-.288T11 21q0-.425.288-.712T12 20q3.35 0 5.675-2.325T20 12q0-.425.288-.712T21 11q.425 0 .713.288T22 12q0 2.075-.788 3.888t-2.15 3.174t-3.187 2.15T12 22m-3-7.75q-.525 0-.887-.363T7.75 13q0-.525.363-.887T9 11.75q.525 0 .888.363T10.25 13q0 .525-.363.888T9 14.25m6 0q-.525 0-.887-.363T13.75 13q0-.525.363-.887T15 11.75q.525 0 .888.363T16.25 13q0 .525-.363.888T15 14.25"/></svg>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                        </svg>
                         Appearance
                     </a>
                     <a href="#" data-settings-page="credits" class="settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)">
-                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3s1.34 3 3 3m-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5S5 6.34 5 8s1.34 3 3 3m0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5m8 0c-.29 0-.62.02-.97.05c1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5"/></svg>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
                         Credits
                     </a>
                     <a href="#" data-settings-page="cloaking" class="settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)">
-                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 6.5a9.77 9.77 0 0 1 8.82 5.5c-1.65 3.37-5.02 5.5-8.82 5.5S4.83 15.37 3.18 12A9.77 9.77 0 0 1 12 6.5m0-2C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5m0 5a2.5 2.5 0 0 1 0 5a2.5 2.5 0 0 1 0-5m0-2c-2.48 0-4.5 2.02-4.5 4.5s2.02 4.5 4.5 4.5s4.5-2.02 4.5-4.5s-2.02-4.5-4.5-4.5"/></svg>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
                         Cloaking
                     </a>
                 </div>
             </div>
-            <div class="h-full mt-14 flex-grow px-12 py-8 flex flex-col overflow-hidden">
-                <div id="settings-content-area" class="h-full overflow-y-auto">
-                    ${this.getProxySettingsHTML()}
+            <div class="h-full mt-14 flex-grow px-12 py-8 flex flex-col">
+                <div id="settings-content-area">
+                    <h1 class="text-4xl font-semibold">Proxy</h1>
+                    <div class="border-b border-(--border) w-full mb-4"></div>
+                    <div class="w-full flex-grow">
+                        <div>
+                            <p>Proxy Switcher</p>
+                            <select id="dropdownBox-pSwitcher" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="uv">Ultraviolet</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="sj">Scramjet</option>
+                            </select>
+                        </div>
+                        <div class="mt-2">
+                            <p>Transport</p>
+                            <select id="dropdownBox-tSwitcher" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="libcurl">Libcurl</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="epoxy">Epoxy</option>
+                            </select>
+                        </div>
+                        <div class="mt-2">
+                            <p>Search Engine</p>
+                            <select id="dropdownBox-sSwitcher" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="https://www.google.com/search?q=">Google</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="https://www.bing.com/search?q=">Bing</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="https://search.brave.com/search?q=">Brave</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mt-6 pt-6 border-t border-(--border)">
+                            <h2 class="text-2xl font-semibold mb-4">Tab Settings</h2>
+                            <div class="mt-2">
+                                <p>Allow Tab Reordering <span class="text-xs opacity-60">(Experimental)</span></p>
+                                <select id="dropdownBox-tabReorder" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
+                                    <option class="w-full bg-(--accent) rounded-sm p-1" value="true">Enabled</option>
+                                    <option class="w-full bg-(--accent) rounded-sm p-1" value="false">Disabled</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-2 w-80">
+                            <div>
+                                <p>Wisp Server</p>
+                                <input class="h-10 w-full rounded-md border border-(--border) px-3 py-2 text-sm" placeholder="Wisp server URL (EX: wss://radiusproxy.app/wisp/" id="wispServerSwitcher" />
+                                <div class="mt-2 hidden" id="adBlocking">
+                                    <p>Ad Blocking</p>
+                                    <select id="dropdownBox-adBlocking" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
+                                        <option class="w-full bg-(--accent) rounded-sm p-1" value="enabled">Enabled</option>
+                                        <option class="w-full bg-(--accent) rounded-sm p-1" value="disabled">Disabled</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-2 mb-2 hidden" id="wispServerInfo">
+                                <p class="text-blue-500" id="wispServerInfo-inner">Checking URL...</p>
+                            </div>
+                            <div class="mt-2 flex flex-row gap-4">
+                                <button id="wispServerSave" class="bg-(--primary) hover:bg-(--primary)/90 cursor-pointer text-(--primary-foreground) inline-flex items-center jusitfy-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors h-10 px-4 py-2">
+                                    <svg class="text-(--primary-foreground) h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                        <polyline points="7 3 7 8 15 8"></polyline>
+                                    </svg>
+                                    Save Changes
+                                </button>
+                                <button id="wispServerReset" class="bg-(--primary) hover:bg-(--primary)/90 cursor-pointer text-(--primary-foreground) inline-flex items-center jusitfy-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors h-10 px-4 py-2">
+                                    <svg class="text-(--primary-foreground) h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                    </svg>
+                                    Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -419,44 +495,6 @@ private setupSettingsPageListeners(tabId: string) {
         const wispServerSave = document.getElementById("wispServerSave") as HTMLButtonElement;
         const wispServerReset = document.getElementById("wispServerReset") as HTMLButtonElement;
         const adBlocking = document.getElementById("adBlocking") as HTMLDivElement;
-
-         const handleNavClick = (e: Event) => {
-            e.preventDefault();
-            const target = e.currentTarget as HTMLElement;
-            const page = target.dataset.settingsPage;
-            
-            if (!page) return;
-            
-            // Update active state for all nav links
-            const allNavLinks = document.querySelectorAll(".settings-nav-link");
-            allNavLinks.forEach(link => {
-                link.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)";
-            });
-            target.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--secondary) hover:bg-(--secondary)/[0.8]";
-            
-            // Update content based on selected page
-            const contentArea = document.getElementById("settings-content-area");
-            if (!contentArea) return;
-
-            if (page === "proxy") {
-                contentArea.innerHTML = this.getProxySettingsHTML();
-                setTimeout(() => this.setupProxyPageListeners(), 50);
-            } else if (page === "appearance") {
-                contentArea.innerHTML = this.getAppearanceSettingsHTML();
-                setTimeout(() => this.setupAppearancePageListeners(), 50);
-            } else if (page === "credits") {
-                contentArea.innerHTML = this.getCreditsHTML();
-            } else if (page === "cloaking") {
-                contentArea.innerHTML = this.getCloakingHTML();
-                setTimeout(() => this.setupCloakingPageListeners(), 50);
-            }
-        };
-
-        // Add click listeners to navigation links
-        const navLinks = document.querySelectorAll(".settings-nav-link");
-        navLinks.forEach(link => {
-            link.addEventListener("click", handleNavClick);
-        });
 
         // Proxy switcher
         if (proxyEl) {
@@ -583,13 +621,19 @@ private setupSettingsPageListeners(tabId: string) {
                 adBlockingFunc();
             });
         }
+
+        // Navigation between settings pages
+        const navLinks = document.querySelectorAll(".settings-nav-link");
+        navLinks.forEach(link => {
+            link.addEventListener("click", (e) => {
+                e.preventDefault();
+                const page = (link as HTMLElement).dataset.settingsPage;
                 
                 // Update active state
                 navLinks.forEach(l => {
                     l.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)";
                 });
                 link.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--secondary) hover:bg-(--secondary)/[0.8]";
-
                 
                 // Update content based on selected page
                 const contentArea = document.getElementById("settings-content-area");
@@ -870,100 +914,6 @@ private setupSettingsPageListeners(tabId: string) {
     if (urlInput) urlInput.value = url;
 
     this.saveTabs();
-}
-    
-    private setupCloakingPageListeners() {
-    const aboutBlankInput = document.getElementById("aboutBlankCloaker") as HTMLInputElement;
-    const aboutBlankButton = document.getElementById("aboutBlankLaunch") as HTMLButtonElement;
-    const blobInput = document.getElementById("blobCloaker") as HTMLInputElement;
-    const blobButton = document.getElementById("blobLaunch") as HTMLButtonElement;
-
-    if (aboutBlankButton && aboutBlankInput && this.sw && this.settings) {
-        aboutBlankButton.addEventListener("click", () => {
-            const url = aboutBlankInput.value || "https://google.com";
-            const searchUrl = this.sw!.search(url, this.storage.getVal('searchEngine') || 'https://www.google.com/search?q=');
-            if (this.settings) {
-                this.settings.cloak(searchUrl).aboutBlank();
-            }
-        });
-    }
-
-    if (blobButton && blobInput && this.sw && this.settings) {
-        blobButton.addEventListener("click", () => {
-            const url = blobInput.value || "https://google.com";
-            const searchUrl = this.sw!.search(url, this.storage.getVal('searchEngine') || 'https://www.google.com/search?q=');
-            if (this.settings) {
-                this.settings.cloak(searchUrl).blob();
-            }
-        });
-    }
-}
-
-    private getAppearanceSettingsHTML(): string {
-    // Available themes based on your theme files
-    const themes = [
-        { name: 'Default', value: 'default' },
-        { name: 'Bluelight', value: 'bluelight' },
-        { name: 'Catpuccin', value: 'catpuccin' },
-        { name: 'Cyberpunk', value: 'cyberpunk' },
-        { name: 'Midnight', value: 'midnight' }
-    ];
-    
-    return `
-        <h1 class="text-4xl font-semibold">Appearance</h1>
-        <div class="border-b border-(--border) w-full mb-4"></div>
-        <div class="w-full flex-grow">
-            <div>
-                <p>Themes</p>
-                <select id="dropdownBox-themeSwitcher" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm appearance-auto">
-                    ${themes.map(theme => `<option class="w-full bg-(--accent) rounded-sm p-1" value="${theme.value}">${theme.name}</option>`).join('')}
-                </select>
-            </div>
-        </div>
-    `;
-}
-
-    private getCloakingHTML(): string {
-    return `
-        <h1 class="text-4xl font-semibold">Cloaking</h1>
-        <div class="border-b border-(--border) w-full mb-4"></div>
-        <div class="w-full flex-grow">
-            <div class="w-full flex flex-row gap-4">
-                <div class="w-1/2">
-                    <div>
-                        <p>About Blank</p>
-                        <input class="h-10 w-full rounded-md border border-(--border) px-3 py-2 text-sm mt-2" placeholder="Redirect url (EX: https://google.com)" id="aboutBlankCloaker" />
-                    </div>
-                    <div class="mt-2">
-                        <button id="aboutBlankLaunch" class="bg-(--primary) hover:bg-(--primary)/90 cursor-pointer text-(--primary-foreground) inline-flex items-center jusitfy-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors h-10 px-4 py-2">
-                            <svg class="text-(--primary-foreground) h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                <polyline points="15 3 21 3 21 9"></polyline>
-                                <line x1="10" y1="14" x2="21" y2="3"></line>
-                            </svg>
-                            Cloak!
-                        </button>
-                    </div>
-                </div>
-                <div class="w-1/2">
-                    <div>
-                        <p>Blob</p>
-                        <input class="h-10 w-full rounded-md border border-(--border) px-3 py-2 text-sm mt-2" placeholder="Redirect url (EX: https://google.com)" id="blobCloaker" />
-                    </div>
-                    <div class="mt-2">
-                        <button id="blobLaunch" class="bg-(--primary) hover:bg-(--primary)/90 cursor-pointer text-(--primary-foreground) inline-flex items-center jusitfy-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors h-10 px-4 py-2">
-                            <svg class="text-(--primary-foreground) h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                <polyline points="15 3 21 3 21 9"></polyline>
-                                <line x1="10" y1="14" x2="21" y2="3"></line>
-                            </svg>
-                            Cloak!
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
 }
     
  private setupEventListeners() {
