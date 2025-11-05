@@ -583,6 +583,13 @@ private setupSettingsPageListeners(tabId: string) {
                 adBlockingFunc();
             });
         }
+
+        // Navigation between settings pages
+        const navLinks = document.querySelectorAll(".settings-nav-link");
+        navLinks.forEach(link => {
+            link.addEventListener("click", (e) => {
+                e.preventDefault();
+                const page = (link as HTMLElement).dataset.settingsPage;
                 
                 // Update active state
                 navLinks.forEach(l => {
