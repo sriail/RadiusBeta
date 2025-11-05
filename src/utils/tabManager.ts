@@ -644,20 +644,16 @@ private setupSettingsPageListeners(tabId: string) {
                         <div class="w-full flex-grow">
                             <div>
                                 <p>Themes</p>
-                             <select id="dropdownBox-themeSwitcher" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
-                            <option class="w-full bg-(--accent) rounded-sm p-1" value="default">Default</option>
-                           <option class="w-full bg-(--accent) rounded-sm p-1" value="amoled">Amoled</option>
-                           <option class="w-full bg-(--accent) rounded-sm p-1" value="catppuccin">Catppuccin</option>
-                           <option class="w-full bg-(--accent) rounded-sm p-1" value="nord">Nord</option>
-                           <option class="w-full bg-(--accent) rounded-sm p-1" value="rose-pine">Rose Pine</option>
-                              </select>
+                                <select id="dropdownBox-themeSwitcher" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
+                                    <option class="w-full bg-(--accent) rounded-sm p-1" value="default">Default</option>
+                                </select>
                             </div>
                         </div>
                     `;
                     
-                   const themeDropdown = document.getElementById("dropdownBox-themeSwitcher") as HTMLSelectElement;
-                  if (themeDropdown && this.settings) {
-                     themeDropdown.value = this.storage.getVal('theme') || 'default';
+                    const themeDropdown = document.getElementById("dropdownBox-themeSwitcher") as HTMLSelectElement;
+                    if (themeDropdown && this.settings) {
+                        themeDropdown.value = this.storage.getVal('theme') || 'default';
                         themeDropdown.addEventListener("change", () => {
                             if (this.settings) {
                                 this.settings.theme(themeDropdown.value);
@@ -665,35 +661,6 @@ private setupSettingsPageListeners(tabId: string) {
                         });
                     }
                 } else if (contentArea && page === "credits") {
-                    contentArea.innerHTML = `
-                        <h1 class="text-4xl font-semibold">Credits</h1>
-                        <div class="border-b border-(--border) w-full mb-4"></div>
-                        <div class="w-full flex-grow">
-                            <div>
-                                <p>Thanks to all the wonderful people who have contributed!</p>
-                                <ul class="list-disc pl-5 mt-2 font-bold">
-                                    <li><a class="underline hover:text-(--accent) transition-colors duration-300" href="https://github.com/hyperficial" target="_blank" rel="noopener noreferrer">Owski</a></li>
-                                    <li><a href="https://github.com/proudparrot2" target="_blank" rel="noopener noreferrer" class="underline hover:text-(--accent) transition-colors duration-300">ProudParrot</a></li>
-                                    <li><a class="underline hover:text-(--accent) transition-colors duration-300" href="https://github.com/motortruck1221" target="_blank" rel="noopener noreferrer">MotorTruck1221</a></li>
-                                    <li><a href="https://mercurywork.shop" target="_blank" rel="noopener noreferrer" class="underline hover:text-(--accent) transition-colors duration-300">The wonderful people over at MercuryWorkshop</a></li>
-                                    <li><a href="https://github.com/titaniumnetwork-dev" target="_blank" rel="noopener noreferrer" class="underline hover:text-(--accent) transition-colors duration-300">Everyone over at TitaniumNetwork</a></li>
-                                    <li><a href="https://github.com/RadiusProxy/Radius/graphs/contributors" target="_blank" rel="noopener noreferrer" class="underline hover:text-(--accent) transition-colors duration-300">And Everyone else who has contributed!</a></li>
-                                </ul>
-                            </div>
-                            <div class="border-t-2 border-(--border) mt-2">
-                                <p class="mt-2">Projects that we use:</p>
-                                <ul class="list-disc pl-5 mt-2 font-bold">
-                                    <li><a href="https://github.com/titaniumnetwork-dev/ultraviolet" target="_blank" rel="noopener noreferrer" class="underline transition-colors duration-300 hover:text-(--accent)">Ultraviolet</a></li>
-                                    <li><a href="https://github.com/mercuryworkshop/scramjet" target="_blank" rel="noopener noreferrer" class="underline transition-colors duration-300 hover:text-(--accent)">Scramjet</a></li>
-                                    <li><a href="https://github.com/ading2210/libcurl.js" target="_blank" rel="noopener noreferrer" class="underline transition-colors duration-300 hover:text-(--accent)">Libcurl.js</a></li>
-                                    <li><a href="https://github.com/mercuryworkshop/epoxy-tls" target="_blank" rel="noopener noreferrer" class="underline transition-colors duration-300 hover:text-(--accent)">Epoxy TLS</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-                 } else if (contentArea && page === "credits") {
                     contentArea.innerHTML = `
                         <h1 class="text-4xl font-semibold">Credits</h1>
                         <div class="border-b border-(--border) w-full mb-4"></div>
