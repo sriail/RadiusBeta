@@ -407,183 +407,137 @@ private getSettingsPageHTML(): string {
         }, 100);
     }
 
-private setupSettingsPageListeners(tabId: string) {
-    setTimeout(() => {
-        const proxyEl = document.getElementById("dropdownBox-pSwitcher") as HTMLSelectElement;
-        const transportEl = document.getElementById("dropdownBox-tSwitcher") as HTMLSelectElement;
-        const seEl = document.getElementById("dropdownBox-sSwitcher") as HTMLSelectElement;
-        const tabReorderEl = document.getElementById("dropdownBox-tabReorder") as HTMLSelectElement;
-        const wispServerSwitcher = document.getElementById("wispServerSwitcher") as HTMLInputElement;
-        const wispServerInfo = document.getElementById("wispServerInfo") as HTMLElement;
-        const wispServerInfoInner = document.getElementById("wispServerInfo-inner") as HTMLParagraphElement;
-        const wispServerSave = document.getElementById("wispServerSave") as HTMLButtonElement;
-        const wispServerReset = document.getElementById("wispServerReset") as HTMLButtonElement;
-        const adBlocking = document.getElementById("adBlocking") as HTMLDivElement;
+private setupProxyPageListeners() {
+    const proxyEl = document.getElementById("dropdownBox-pSwitcher") as HTMLSelectElement;
+    const transportEl = document.getElementById("dropdownBox-tSwitcher") as HTMLSelectElement;
+    const seEl = document.getElementById("dropdownBox-sSwitcher") as HTMLSelectElement;
+    const tabReorderEl = document.getElementById("dropdownBox-tabReorder") as HTMLSelectElement;
+    const wispServerSwitcher = document.getElementById("wispServerSwitcher") as HTMLInputElement;
+    const wispServerInfo = document.getElementById("wispServerInfo") as HTMLElement;
+    const wispServerInfoInner = document.getElementById("wispServerInfo-inner") as HTMLParagraphElement;
+    const wispServerSave = document.getElementById("wispServerSave") as HTMLButtonElement;
+    const wispServerReset = document.getElementById("wispServerReset") as HTMLButtonElement;
+    const adBlocking = document.getElementById("adBlocking") as HTMLDivElement;
 
-        // Proxy switcher
-        if (proxyEl) {
-            proxyEl.value = this.storage.getVal("proxy") || "uv";
-            proxyEl.addEventListener("change", () => {
-                if (this.settings) {
-                    this.settings.proxy(proxyEl.value as "uv" | "sj");
-                }
-            });
-        }
-
-        // Transport switcher
-        if (transportEl) {
-            transportEl.value = this.storage.getVal("transport") || "libcurl";
-            transportEl.addEventListener("change", async () => {
-                if (this.sw) {
-                    await this.sw.setTransport(transportEl.value as "epoxy" | "libcurl");
-                }
-            });
-        }
-
-        // Search engine
-        if (seEl) {
-            seEl.value = this.storage.getVal("searchEngine") || "https://duckduckgo.com/?q=";
-            seEl.addEventListener("change", () => {
-                if (this.settings) {
-                    this.settings.searchEngine(seEl.value);
-                }
-            });
-        }
-
-        // Tab reordering
-        if (tabReorderEl) {
-            tabReorderEl.value = this.storage.getVal("allowTabReordering") || "false";
-            tabReorderEl.addEventListener("change", () => {
-                this.storage.setVal("allowTabReordering", tabReorderEl.value);
-            });
-        }
-
-        // Wisp server
-        if (wispServerSwitcher) {
-            wispServerSwitcher.value = this.storage.getVal("wispServer") || "";
-        }
-
-        const resetVal = `${(location.protocol === "https:" ? "wss://" : "ws://")}${location.host}/wisp/`;
-        
-        const reset = (hide: boolean = true) => {
-            if (hide && wispServerInfo) wispServerInfo.classList.add("hidden");
-            if (wispServerInfoInner) {
-                wispServerInfoInner.innerText = "Checking URL...";
-                wispServerInfoInner.classList.remove("text-red-500", "text-green-500");
+    if (proxyEl) {
+        proxyEl.value = this.storage.getVal("proxy") || "uv";
+        proxyEl.addEventListener("change", () => {
+            if (this.settings) {
+                this.settings.proxy(proxyEl.value as "uv" | "sj");
             }
-        };
+        });
+    }
 
-        const adBlockingFunc = () => {
-            const adBlockingDropdown = document.getElementById("dropdownBox-adBlocking") as HTMLSelectElement;
-            if (adBlockingDropdown) {
-                adBlockingDropdown.addEventListener("change", () => {
-                    if (this.settings) {
-                        this.settings.adBlock(adBlockingDropdown.value === "enabled" ? true : false);
-                    }
-                });
+    if (transportEl) {
+        transportEl.value = this.storage.getVal("transport") || "libcurl";
+        transportEl.addEventListener("change", async () => {
+            if (this.sw) {
+                await this.sw.setTransport(transportEl.value as "epoxy" | "libcurl");
+            }
+        });
+    }
 
-                adBlockingDropdown.value = this.storage.getVal("adBlock") === "true" ? "enabled" : "disabled";
+    if (seEl) {
+        seEl.value = this.storage.getVal("searchEngine") || "https://duckduckgo.com/?q=";
+        seEl.addEventListener("change", () => {
+            if (this.settings) {
+                this.settings.searchEngine(seEl.value);
+            }
+        });
+    }
 
-                if (wispServerSwitcher && wispServerSwitcher.value === resetVal) {
-                    adBlocking?.classList.remove("hidden");
-                    if (this.settings) {
-                        this.settings.adBlock(true);
-                    }
-                    adBlockingDropdown.value = "enabled";
-                } else {
-                    adBlocking?.classList.add("hidden");
-                    if (this.settings) {
-                        this.settings.adBlock(false);
-                    }
+    if (tabReorderEl) {
+        tabReorderEl.value = this.storage.getVal("allowTabReordering") || "false";
+        tabReorderEl.addEventListener("change", () => {
+            this.storage.setVal("allowTabReordering", tabReorderEl.value);
+        });
+    }
+
+    if (wispServerSwitcher) {
+        wispServerSwitcher.value = this.storage.getVal("wispServer") || "";
+    }
+
+    const resetVal = `${(location.protocol === "https:" ? "wss://" : "ws://")}${location.host}/wisp/`;
+    
+    const reset = (hide: boolean = true) => {
+        if (hide && wispServerInfo) wispServerInfo.classList.add("hidden");
+        if (wispServerInfoInner) {
+            wispServerInfoInner.innerText = "Checking URL...";
+            wispServerInfoInner.classList.remove("text-red-500", "text-green-500");
+        }
+    };
+
+    const adBlockingFunc = () => {
+        const adBlockingDropdown = document.getElementById("dropdownBox-adBlocking") as HTMLSelectElement;
+        if (adBlockingDropdown) {
+            adBlockingDropdown.addEventListener("change", () => {
+                if (this.settings) {
+                    this.settings.adBlock(adBlockingDropdown.value === "enabled" ? true : false);
+                }
+            });
+
+            adBlockingDropdown.value = this.storage.getVal("adBlock") === "true" ? "enabled" : "disabled";
+
+            if (wispServerSwitcher && wispServerSwitcher.value === resetVal) {
+                adBlocking?.classList.remove("hidden");
+                if (this.settings) {
+                    this.settings.adBlock(true);
+                }
+                adBlockingDropdown.value = "enabled";
+            } else {
+                adBlocking?.classList.add("hidden");
+                if (this.settings) {
+                    this.settings.adBlock(false);
                 }
             }
-        };
-        adBlockingFunc();
-
-        if (wispServerSave) {
-            wispServerSave.addEventListener("click", async () => {
-                const server = wispServerSwitcher.value;
-                wispServerInfo?.classList.remove("hidden");
-
-                if (!server.match(/^wss?:\/\/.*/)) {
-                    reset(false);
-                    if (wispServerInfoInner) {
-                        wispServerInfoInner.innerText = "Invalid URL! \nURL's MUST start with wss:// or ws://";
-                        wispServerInfoInner.classList.add("text-red-500");
-                    }
-                } else {
-                    reset(false);
-                    if (wispServerInfoInner) {
-                        wispServerInfoInner.innerText = "Wisp Server Set!";
-                        wispServerInfoInner.classList.add("text-green-500");
-                    }
-                    if (this.sw) {
-                        await this.sw.wispServer(wispServerSwitcher.value, true);
-                    }
-                    adBlockingFunc();
-                }
-
-                setTimeout(reset, 4000);
-            });
         }
+    };
+    adBlockingFunc();
 
-        if (wispServerReset) {
-            wispServerReset.addEventListener("click", async () => {
-                wispServerInfo?.classList.remove("hidden");
+    if (wispServerSave) {
+        wispServerSave.addEventListener("click", async () => {
+            const server = wispServerSwitcher.value;
+            wispServerInfo?.classList.remove("hidden");
+
+            if (!server.match(/^wss?:\/\/.*/)) {
+                reset(false);
                 if (wispServerInfoInner) {
-                    wispServerInfoInner.innerText = "Wisp Server Reset!";
+                    wispServerInfoInner.innerText = "Invalid URL! \nURL's MUST start with wss:// or ws://";
+                    wispServerInfoInner.classList.add("text-red-500");
+                }
+            } else {
+                reset(false);
+                if (wispServerInfoInner) {
+                    wispServerInfoInner.innerText = "Wisp Server Set!";
                     wispServerInfoInner.classList.add("text-green-500");
                 }
                 if (this.sw) {
-                    await this.sw.wispServer(resetVal, true);
+                    await this.sw.wispServer(wispServerSwitcher.value, true);
                 }
-                if (wispServerSwitcher) {
-                    wispServerSwitcher.value = this.storage.getVal("wispServer") || "";
-                }
-                setTimeout(reset, 4000);
                 adBlockingFunc();
-            });
-        }
-
-        // Fixed navigation between settings pages - use event delegation
-        const handleNavClick = (e: Event) => {
-            e.preventDefault();
-            const target = e.currentTarget as HTMLElement;
-            const page = target.dataset.settingsPage;
-            
-            if (!page) return;
-            
-            // Update active state for all nav links
-            const allNavLinks = document.querySelectorAll(".settings-nav-link");
-            allNavLinks.forEach(link => {
-                link.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--background) hover:bg-(--accent)";
-            });
-            target.className = "settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--secondary) hover:bg-(--secondary)/[0.8]";
-            
-            // Update content based on selected page
-            const contentArea = document.getElementById("settings-content-area");
-            if (!contentArea) return;
-
-            if (page === "proxy") {
-                contentArea.innerHTML = this.getProxySettingsHTML();
-                setTimeout(() => this.setupProxyPageListeners(), 50);
-            } else if (page === "appearance") {
-                contentArea.innerHTML = this.getAppearanceSettingsHTML();
-                setTimeout(() => this.setupAppearancePageListeners(), 50);
-            } else if (page === "credits") {
-                contentArea.innerHTML = this.getCreditsHTML();
-            } else if (page === "cloaking") {
-                contentArea.innerHTML = this.getCloakingHTML();
-                setTimeout(() => this.setupCloakingPageListeners(), 50);
             }
-        };
 
-        // Add click listeners to navigation links
-        const navLinks = document.querySelectorAll(".settings-nav-link");
-        navLinks.forEach(link => {
-            link.addEventListener("click", handleNavClick);
+            setTimeout(reset, 4000);
         });
-    }, 100);
+    }
+
+    if (wispServerReset) {
+        wispServerReset.addEventListener("click", async () => {
+            wispServerInfo?.classList.remove("hidden");
+            if (wispServerInfoInner) {
+                wispServerInfoInner.innerText = "Wisp Server Reset!";
+                wispServerInfoInner.classList.add("text-green-500");
+            }
+            if (this.sw) {
+                await this.sw.wispServer(resetVal, true);
+            }
+            if (wispServerSwitcher) {
+                wispServerSwitcher.value = this.storage.getVal("wispServer") || "";
+            }
+            setTimeout(reset, 4000);
+            adBlockingFunc();
+        });
+    }
 }
     
     private handleIframeLoad(tabId: string) {
