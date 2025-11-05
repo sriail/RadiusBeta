@@ -2,6 +2,9 @@
 import SettingsLayout from "@layouts/SettingsLayout.astro";
 import Input from "@components/ui/Input.astro";
 import Button from "@components/ui/Button.astro";
+import { Settings } from "@utils/settings.ts";
+import { StoreManager } from "@utils/storage";
+import { SW } from "@utils/proxy.ts";
 ---
 <SettingsLayout active="cloaking" title="Cloaking">
     <div class="w-full flex-grow overflow-y-auto">
@@ -28,10 +31,6 @@ import Button from "@components/ui/Button.astro";
     </div>
 </SettingsLayout>
 <script>
-    import { Settings } from "@utils/settings.ts";
-    import { StoreManager } from "@utils/storage";
-    import { SW } from "@utils/proxy.ts";
-
     const handleAb = async (settings: Settings, sw: SW, storage: StoreManager<"radius||settings">) => {
         const input = document.getElementById("aboutBlankCloaker") as HTMLInputElement;
         const button = document.getElementById("aboutBlankLaunch") as HTMLButtonElement;
