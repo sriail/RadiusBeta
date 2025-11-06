@@ -53,12 +53,15 @@ files.forEach((name) => {
         });
         
         // Send initial theme to parent on page load if inside iframe
+        // Use setTimeout to avoid race condition with parent's message listener setup
         if (window.parent !== window) {
-            const currentTheme = storage.getVal('theme') || 'default';
-            window.parent.postMessage({
-                type: "theme-change",
-                theme: currentTheme
-            }, window.location.origin);
+            setTimeout(() => {
+                const currentTheme = storage.getVal('theme') || 'default';
+                window.parent.postMessage({
+                    type: "theme-change",
+                    theme: currentTheme
+                }, window.location.origin);
+            }, 100);
         }
     };
 

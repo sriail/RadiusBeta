@@ -220,7 +220,7 @@ export class TabManager {
             iframe.id = `iframe-${tab.id}`;
             iframe.className = "w-full h-full border-0";
             iframe.src = "/settings/";
-            iframe.sandbox.add("allow-same-origin", "allow-scripts", "allow-forms");
+            iframe.sandbox.add("allow-same-origin", "allow-scripts", "allow-forms", "allow-popups");
 
             this.iframeRefs.set(tab.id, iframe);
             tabContentDiv.appendChild(iframe);
@@ -691,10 +691,13 @@ export class TabManager {
             if (event.origin !== window.location.origin) return;
 
             if (event.data && event.data.type === "theme-change") {
-                // Apply theme change site-wide
+                // Validate theme value is a non-empty string
                 const theme = event.data.theme;
-                if (this.settings) {
-                    this.settings.theme(theme);
+                if (typeof theme === "string" && theme.trim().length > 0) {
+                    // Apply theme change site-wide
+                    if (this.settings) {
+                        this.settings.theme(theme);
+                    }
                 }
             }
         });
