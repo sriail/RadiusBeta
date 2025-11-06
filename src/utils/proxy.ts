@@ -66,7 +66,7 @@ class SW {
                 return wispServerVal.replace("/wisp/", "/adblock/");
             }
             return wispServerVal;
-        }
+        };
         if (get) return this.#storageManager.getVal("transport");
         this.#storageManager.setVal(
             "transport",
@@ -74,9 +74,7 @@ class SW {
         );
         switch (transport) {
             case "epoxy": {
-                await this.#baremuxConn!.setTransport("/epoxy/index.mjs", [
-                    { wisp: wispServer() }
-                ]);
+                await this.#baremuxConn!.setTransport("/epoxy/index.mjs", [{ wisp: wispServer() }]);
             }
             case "libcurl": {
                 await this.#baremuxConn!.setTransport("/libcurl/index.mjs", [
@@ -84,9 +82,7 @@ class SW {
                 ]);
             }
             default: {
-                await this.#baremuxConn!.setTransport("/epoxy/index.mjs", [
-                    { wisp: wispServer() }
-                ]);
+                await this.#baremuxConn!.setTransport("/epoxy/index.mjs", [{ wisp: wispServer() }]);
             }
         }
     }

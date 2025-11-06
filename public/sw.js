@@ -1,8 +1,4 @@
-importScripts(
-    "/vu/uv.bundle.js",
-    "/vu/uv.config.js",
-    "/marcs/scramjet.all.js"
-);
+importScripts("/vu/uv.bundle.js", "/vu/uv.config.js", "/marcs/scramjet.all.js");
 importScripts(__uv$config.sw || "/vu/uv.sw.js");
 
 const uv = new UVServiceWorker();

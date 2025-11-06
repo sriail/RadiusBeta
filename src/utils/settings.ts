@@ -87,8 +87,8 @@ class Settings {
                 if (!win) return;
                 window.location.replace(location);
                 const iframe = win.document.createElement("iframe") as HTMLIFrameElement;
-                win.document.body.setAttribute('style', 'margin: 0; height: 100vh; width: 100%;');
-                iframe.setAttribute('style', 'border: none; width: 100%; height: 100%; margin: 0;');
+                win.document.body.setAttribute("style", "margin: 0; height: 100vh; width: 100%;");
+                iframe.setAttribute("style", "border: none; width: 100%; height: 100%; margin: 0;");
                 iframe.src = window.location.href;
                 win.document.body.appendChild(iframe);
             },
@@ -115,18 +115,17 @@ class Settings {
                         </body>
                     </html>
                 `;
-                const blob = new Blob([content], { type: 'text/html' });
+                const blob = new Blob([content], { type: "text/html" });
                 const url = URL.createObjectURL(blob);
                 win.location.href = url;
             }
-        }
+        };
     }
 
     adBlock(enabled?: boolean) {
         if (enabled === true || enabled === false) {
             this.#storageManager.setVal("adBlock", enabled.valueOf().toString());
-        }
-        else {
+        } else {
             this.#storageManager.setVal("adBlock", "true");
         }
     }

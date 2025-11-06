@@ -40,8 +40,29 @@ files.forEach((name) => {
         }
         dropdown.value = storage.getVal('theme') || 'default';
         dropdown.addEventListener("change", async () => {
-            settings.theme(dropdown.value);
+            const selectedTheme = dropdown.value;
+            settings.theme(selectedTheme);
+            
+            // Send theme change to parent window if inside iframe
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: "theme-change",
+                    theme: selectedTheme
+                }, window.location.origin);
+            }
         });
+        
+        // Send initial theme to parent on page load if inside iframe
+        // Use setTimeout to avoid race condition with parent's message listener setup
+        if (window.parent !== window) {
+            setTimeout(() => {
+                const currentTheme = storage.getVal('theme') || 'default';
+                window.parent.postMessage({
+                    type: "theme-change",
+                    theme: currentTheme
+                }, window.location.origin);
+            }, 100);
+        }
     };
 
     document.addEventListener("astro:page-load", async () => {
