@@ -347,9 +347,9 @@ export class TabManager {
 
  private getSettingsPageHTML(): string {
     return `
-        <div class="h-full w-full flex font-inter">
-            <div class="w-1/4 bg-(--background) flex mt-14">
-                <div class="h-full w-full flex flex-col font-inter p-4 pl-8 pt-8 gap-2">
+      <div class="h-screen w-full flex font-inter overflow-hidden">
+            <div class="w-1/4 bg-(--background) flex mt-14 overflow-y-auto">
+                <div class="h-full w-full flex flex-col font-inter p-4 pl-8 pt-8 gap-2 overflow-y-auto">
                     <a href="#" data-settings-page="proxy" class="settings-nav-link gap-2 px-4 py-2 rounded-lg h-10 w-full text-sm font-medium transition-colors items-center justify-start inline-flex bg-(--secondary) hover:bg-(--secondary)/[0.8]">
                         <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -381,7 +381,7 @@ export class TabManager {
                     </a>
                 </div>
             </div>
-            <div class="h-full mt-14 flex-grow px-12 py-8 flex flex-col">
+            <div class="h-screen mt-14 flex-grow px-12 py-8 flex flex-col overflow-y-auto">
                 <div id="settings-content-area">
                     <h1 class="text-4xl font-semibold">Proxy</h1>
                     <div class="border-b border-(--border) w-full mb-4"></div>
@@ -653,7 +653,7 @@ private setupSettingsPageListeners(tabId: string) {
                     
                     const themeDropdown = document.getElementById("dropdownBox-themeSwitcher") as HTMLSelectElement;
                     if (themeDropdown && this.settings) {
-                        themeDropdown.value = this.storage.getVal('theme');
+                        themeDropdown.value = this.storage.getVal('theme') || 'default';
                         themeDropdown.addEventListener("change", () => {
                             if (this.settings) {
                                 this.settings.theme(themeDropdown.value);
@@ -687,6 +687,57 @@ private setupSettingsPageListeners(tabId: string) {
                             </div>
                         </div>
                     `;
+                } else if (contentArea && page === "cloaking") {
+                    contentArea.innerHTML = `
+                        <h1 class="text-4xl font-semibold">Cloaking</h1>
+                        <div class="border-b border-(--border) w-full mb-4"></div>
+                        <div class="w-full flex-grow">
+                            <div class="w-full flex flex-row gap-4">
+                                <div class="w-1/2">
+                                    <div>
+                                        <p>About Blank</p>
+                                        <input class="h-10 w-full rounded-md border border-(--border) px-3 py-2 text-sm" placeholder="Redirect url (EX: https://google.com)" id="aboutBlankCloaker" />
+                                    </div>
+                                    <div class="mt-2">
+                                        <button id="aboutBlankLaunch" class="bg-(--primary) hover:bg-(--primary)/90 cursor-pointer text-(--primary-foreground) inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors h-10 px-4 py-2">
+                                            Cloak!
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="w-1/2">
+                                    <div>
+                                        <p>Blob</p>
+                                        <input class="h-10 w-full rounded-md border border-(--border) px-3 py-2 text-sm" placeholder="Redirect url (EX: https://google.com)" id="blobCloaker" />
+                                    </div>
+                                    <div class="mt-2">
+                                        <button id="blobLaunch" class="bg-(--primary) hover:bg-(--primary)/90 cursor-pointer text-(--primary-foreground) inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors h-10 px-4 py-2">
+                                            Cloak!
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Setup cloaking button listeners
+                    const aboutBlankInput = document.getElementById("aboutBlankCloaker") as HTMLInputElement;
+                    const aboutBlankButton = document.getElementById("aboutBlankLaunch") as HTMLButtonElement;
+                    const blobInput = document.getElementById("blobCloaker") as HTMLInputElement;
+                    const blobButton = document.getElementById("blobLaunch") as HTMLButtonElement;
+                    
+                    if (aboutBlankButton && aboutBlankInput && this.settings && this.sw) {
+                        aboutBlankButton.addEventListener("click", () => {
+                            const url = this.sw!.search(aboutBlankInput.value, this.storage.getVal('searchEngine'));
+                            this.settings!.cloak(url).aboutBlank();
+                        });
+                    }
+                    
+                    if (blobButton && blobInput && this.settings && this.sw) {
+                        blobButton.addEventListener("click", () => {
+                            const url = this.sw!.search(blobInput.value, this.storage.getVal('searchEngine'));
+                            this.settings!.cloak(url).blob();
+                        });
+                    }
                 }
             });
         });

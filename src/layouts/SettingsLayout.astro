@@ -3,15 +3,14 @@ import Layout from "@layouts/Layout.astro";
 import SettingsNav from "@components/SettingsNav.astro";
 import type { SettingsProps as Props } from "@utils/types.ts";
 
-//I love prop drilling
 const { active, title } = Astro.props;
 ---
 <Layout>
-    <div class="h-full w-full flex font-inter">
-        <div class="w-1/4 bg-(--background) flex mt-14">
+    <div class="h-screen w-full flex font-inter overflow-hidden">
+        <div class="w-1/4 bg-(--background) flex mt-14 overflow-y-auto">
             <SettingsNav active={active} title={title} />
         </div>
-        <div class="h-full mt-14 flex-grow px-12 py-8 flex flex-col">
+        <div class="h-screen mt-14 flex-grow px-12 py-8 flex flex-col overflow-y-auto">
             <h1 class="text-4xl font-semibold"> {title} </h1>
             <div class="border-b border-(--border) w-full mb-4"></div>
             <slot />

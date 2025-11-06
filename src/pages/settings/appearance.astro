@@ -8,7 +8,7 @@ import Input from "@components/ui/Input.astro";
 import Button from "@components/ui/Button.astro";
 import { type DropdownOptions } from "@utils/types";
 
-const Themes: DropdownOptions[] = [{ name: "Default", value: "default" }];
+const Themes: DropdownOptions[] = [{ name: "Default", value: "default", default: true }];
 const files = await readdir(pathJoin("src", "styles", "themes"), {
     encoding: "utf-8"
 });
@@ -20,7 +20,7 @@ files.forEach((name) => {
 });
 ---
 <SettingsLayout active="appearance" title="Appearance">
-    <div class="w-full flex-grow">
+    <div class="w-full flex-grow overflow-y-auto">
         <div>
             <p> Themes </p>
             <Dropdown id="themeSwitcher" options={Themes} />
@@ -34,7 +34,11 @@ files.forEach((name) => {
 
     const themes = async (settings: Settings, storage: StoreManager<"radius||settings">) => {
         const dropdown = document.getElementById("dropdownBox-themeSwitcher") as HTMLSelectElement;
-        dropdown.value = storage.getVal('theme');
+        if (!dropdown) {
+            console.error("Theme dropdown not found");
+            return;
+        }
+        dropdown.value = storage.getVal('theme') || 'default';
         dropdown.addEventListener("change", async () => {
             settings.theme(dropdown.value);
         });
@@ -46,7 +50,7 @@ files.forEach((name) => {
             const storageManager = new StoreManager<"radius||settings">("radius||settings");
             await themes(settings, storageManager);
         } catch (err) {
-            console.log(err);
+            console.error("Failed to initialize themes:", err);
         };
     });
 </script>

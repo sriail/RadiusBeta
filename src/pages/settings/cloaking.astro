@@ -4,7 +4,7 @@ import Input from "@components/ui/Input.astro";
 import Button from "@components/ui/Button.astro";
 ---
 <SettingsLayout active="cloaking" title="Cloaking">
-    <div class="w-full flex-grow">
+    <div class="w-full flex-grow overflow-y-auto">
         <div class="w-full flex flex-row gap-4">
             <div class="w-1/2">
                 <div>
@@ -28,13 +28,19 @@ import Button from "@components/ui/Button.astro";
     </div>
 </SettingsLayout>
 <script>
-    import { Settings } from "@utils/settings.ts";
-    import { StoreManager } from "@utils/storage";
-    import { SW } from "@utils/proxy.ts";
+import { Settings } from "@utils/settings.ts";
+import { StoreManager } from "@utils/storage";
+import { SW } from "@utils/proxy.ts";
 
     const handleAb = async (settings: Settings, sw: SW, storage: StoreManager<"radius||settings">) => {
         const input = document.getElementById("aboutBlankCloaker") as HTMLInputElement;
         const button = document.getElementById("aboutBlankLaunch") as HTMLButtonElement;
+        
+        if (!input || !button) {
+            console.error("About Blank elements not found");
+            return;
+        }
+        
         button.addEventListener("click", () => {
             const url = sw.search(input.value, storage.getVal('searchEngine'));
             settings.cloak(url).aboutBlank();
@@ -44,6 +50,12 @@ import Button from "@components/ui/Button.astro";
     const handleBlob = async (settings: Settings, sw: SW, storage: StoreManager<"radius||settings">) => {
         const input = document.getElementById("blobCloaker") as HTMLInputElement;
         const button = document.getElementById("blobLaunch") as HTMLButtonElement;
+        
+        if (!input || !button) {
+            console.error("Blob elements not found");
+            return;
+        }
+        
         button.addEventListener("click", () => {
             const url = sw.search(input.value, storage.getVal('searchEngine'));
             settings.cloak(url).blob();
@@ -51,13 +63,15 @@ import Button from "@components/ui/Button.astro";
     };
 
     document.addEventListener('astro:page-load', async () => {
-        const settings = await Settings.getInstance();
-        const sw = SW.getInstance().next().value!;
-        const storageManager = new StoreManager<"radius||settings">("radius||settings");
         try {
+            const settings = await Settings.getInstance();
+            const sw = SW.getInstance().next().value!;
+            const storageManager = new StoreManager<"radius||settings">("radius||settings");
             await handleAb(settings, sw, storageManager);
             await handleBlob(settings, sw, storageManager);
         }
-        catch (_) {}
+        catch (err) {
+            console.error("Failed to initialize cloaking page:", err);
+        }
     });
 </script>
