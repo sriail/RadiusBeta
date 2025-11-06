@@ -273,7 +273,7 @@ Object.keys(SearchEngines).forEach((k) =>
                     setTimeout(() => location.reload(), RELOAD_DELAY_MS);
                 } catch (e) {
                     reset(false);
-                    bareMuxServerInfoInner.innerText = "Invalid URL! URL must start with http:// or https:// and be properly formatted";
+                    bareMuxServerInfoInner.innerText = "Invalid URL format. Use http:// or https://";
                     bareMuxServerInfoInner.classList.add("text-red-500");
                 }
             } else {
