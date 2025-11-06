@@ -103,6 +103,10 @@ Object.keys(SearchEngines).forEach((k) =>
     import { StoreManager } from "@utils/storage";
     import { SearchEngines } from "@utils/types";
 
+    // Constants for timing
+    const RELOAD_DELAY_MS = 1500;
+    const MESSAGE_HIDE_DELAY_MS = 4000;
+
     type Options = {
         settings: Settings,
         sw: SW,
@@ -196,7 +200,7 @@ Object.keys(SearchEngines).forEach((k) =>
                 adBlockingFunc();
             }
 
-            setTimeout(reset, 4000);
+            setTimeout(reset, MESSAGE_HIDE_DELAY_MS);
         });
 
         wispServerReset.addEventListener("click", async () => {
@@ -205,7 +209,7 @@ Object.keys(SearchEngines).forEach((k) =>
             wispServerInfoInner.classList.add("text-green-500");
             await opts.sw.wispServer(resetVal, true);
             wispServerSwitcher.value = opts.storageManager.getVal("wispServer");
-            setTimeout(reset, 4000);
+            setTimeout(reset, MESSAGE_HIDE_DELAY_MS);
             adBlockingFunc();
         });
     }
@@ -266,7 +270,7 @@ Object.keys(SearchEngines).forEach((k) =>
                     opts.storageManager.setVal("customBareMuxUrl", server);
                     opts.storageManager.setVal("useCustomBareMux", "custom");
                     // Reload to apply changes
-                    setTimeout(() => location.reload(), 1500);
+                    setTimeout(() => location.reload(), RELOAD_DELAY_MS);
                 } catch (e) {
                     reset(false);
                     bareMuxServerInfoInner.innerText = "Invalid URL! URL must start with http:// or https:// and be properly formatted";
@@ -279,10 +283,10 @@ Object.keys(SearchEngines).forEach((k) =>
                 bareMuxServerInfoInner.classList.add("text-green-500");
                 opts.storageManager.setVal("useCustomBareMux", "local");
                 // Reload to apply changes
-                setTimeout(() => location.reload(), 1500);
+                setTimeout(() => location.reload(), RELOAD_DELAY_MS);
             }
 
-            setTimeout(() => reset(), 4000);
+            setTimeout(() => reset(), MESSAGE_HIDE_DELAY_MS);
         });
 
         bareMuxServerReset.addEventListener("click", async () => {
@@ -294,9 +298,9 @@ Object.keys(SearchEngines).forEach((k) =>
             customBareMuxDropdown.value = "local";
             bareMuxServerSwitcher.value = "";
             toggleUrlInput();
-            setTimeout(() => reset(), 4000);
+            setTimeout(() => reset(), MESSAGE_HIDE_DELAY_MS);
             // Reload to apply changes
-            setTimeout(() => location.reload(), 1500);
+            setTimeout(() => location.reload(), RELOAD_DELAY_MS);
         });
     }
 

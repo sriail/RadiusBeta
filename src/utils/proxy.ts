@@ -132,7 +132,7 @@ class SW {
                     const url = new URL(customBareMuxUrl);
                     // Only allow http and https protocols for security
                     if (url.protocol === "http:" || url.protocol === "https:") {
-                        bareMuxWorkerUrl = `${url.origin}${url.pathname}${url.pathname.endsWith("/") ? "" : "/"}worker.js`;
+                        bareMuxWorkerUrl = new URL("worker.js", customBareMuxUrl).toString();
                         console.log(`Using custom Bare-Mux server: ${bareMuxWorkerUrl}`);
                     } else {
                         console.error(
