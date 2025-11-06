@@ -645,8 +645,12 @@ private setupSettingsPageListeners(tabId: string) {
                             <div>
                                 <p>Themes</p>
                                 <select id="dropdownBox-themeSwitcher" class="cursor-pointer flex h-10 w-[180px] items-center justify-between text-(--foreground) background-(--background) rounded-lg border border-(--border) px-3 py-2 text-sm">
-                                    <option class="w-full bg-(--accent) rounded-sm p-1" value="default">Default</option>
-                                </select>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="default">Default</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="amoled">Amoled</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="catppuccin">Catppuccin</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="nord">Nord</option>
+                                <option class="w-full bg-(--accent) rounded-sm p-1" value="rose-pine">Rose Pine</option>
+                                 </select>
                             </div>
                         </div>
                     `;
