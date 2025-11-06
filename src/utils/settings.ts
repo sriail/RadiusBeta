@@ -130,6 +130,22 @@ class Settings {
         }
     }
 
+    bareMuxServer(url?: string, useCustom?: boolean) {
+        if (url !== undefined) {
+            this.#storageManager.setVal("customBareMuxUrl", url);
+        }
+        if (useCustom !== undefined) {
+            this.#storageManager.setVal("useCustomBareMux", useCustom ? "custom" : "local");
+        }
+    }
+
+    getBareMuxServer(): { url: string; useCustom: boolean } {
+        return {
+            url: this.#storageManager.getVal("customBareMuxUrl") || "",
+            useCustom: this.#storageManager.getVal("useCustomBareMux") === "custom"
+        };
+    }
+
     async *#init() {
         yield this.theme(this.#storageManager.getVal("theme") || "default");
     }

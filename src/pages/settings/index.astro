@@ -70,6 +70,31 @@ Object.keys(SearchEngines).forEach((k) =>
                 <Button id="wispServerReset" text="Reset" icon="material-symbols:refresh" />
             </div>
         </div>
+        
+        <!-- NEW: Bare-Mux Server Settings -->
+        <div class="mt-6 pt-6 border-t border-(--border) w-80">
+            <h2 class="text-xl font-semibold mb-4">Bare-Mux Server</h2>
+            <div class="mt-2">
+                <p> Use Custom Bare-Mux Server </p>
+                <Dropdown id="customBareMux" options={
+                    [
+                        { name: 'Local', value: 'local', default: true },
+                        { name: 'Custom', value: 'custom' }
+                    ]
+                } />
+            </div>
+            <div class="mt-2" id="bareMuxUrlContainer">
+                <p> Bare-Mux Server URL </p>
+                <Input id="bareMuxServerSwitcher" placeholder="Bare-Mux server URL (e.g., https://example.com/bare/)" />
+            </div>
+            <div class="mt-2 mb-2 hidden" id="bareMuxServerInfo">
+                <p class="text-blue-500" id="bareMuxServerInfo-inner"> Checking URL... </p>
+            </div>
+            <div class="mt-2 flex flex-row gap-4">
+                <Button id="bareMuxServerSave" text="Save Changes" icon="material-symbols:save-outline" />
+                <Button id="bareMuxServerReset" text="Reset" icon="material-symbols:refresh" />
+            </div>
+        </div>
     </div>
 </SettingsLayout>
 <script>
@@ -77,6 +102,10 @@ Object.keys(SearchEngines).forEach((k) =>
     import { SW } from "@utils/proxy.ts";
     import { StoreManager } from "@utils/storage";
     import { SearchEngines } from "@utils/types";
+
+    // Constants for timing
+    const RELOAD_DELAY_MS = 1500;
+    const MESSAGE_HIDE_DELAY_MS = 4000;
 
     type Options = {
         settings: Settings,
@@ -171,7 +200,7 @@ Object.keys(SearchEngines).forEach((k) =>
                 adBlockingFunc();
             }
 
-            setTimeout(reset, 4000);
+            setTimeout(reset, MESSAGE_HIDE_DELAY_MS);
         });
 
         wispServerReset.addEventListener("click", async () => {
@@ -180,8 +209,98 @@ Object.keys(SearchEngines).forEach((k) =>
             wispServerInfoInner.classList.add("text-green-500");
             await opts.sw.wispServer(resetVal, true);
             wispServerSwitcher.value = opts.storageManager.getVal("wispServer");
-            setTimeout(reset, 4000);
+            setTimeout(reset, MESSAGE_HIDE_DELAY_MS);
             adBlockingFunc();
+        });
+    }
+
+    const bareMuxServer = async (opts: Options) => {
+        const customBareMuxDropdown = document.getElementById("dropdownBox-customBareMux") as HTMLSelectElement;
+        const bareMuxUrlContainer = document.getElementById("bareMuxUrlContainer") as HTMLDivElement;
+        const bareMuxServerSwitcher = document.getElementById("bareMuxServerSwitcher") as HTMLInputElement;
+        const bareMuxServerInfo = document.getElementById("bareMuxServerInfo") as HTMLElement;
+        const bareMuxServerInfoInner = document.getElementById("bareMuxServerInfo-inner") as HTMLParagraphElement;
+        const bareMuxServerSave = document.getElementById("bareMuxServerSave") as HTMLButtonElement;
+        const bareMuxServerReset = document.getElementById("bareMuxServerReset") as HTMLButtonElement;
+
+        // Initialize values
+        const useCustomBareMux = opts.storageManager.getVal("useCustomBareMux") || "local";
+        customBareMuxDropdown.value = useCustomBareMux;
+        bareMuxServerSwitcher.value = opts.storageManager.getVal("customBareMuxUrl") || "";
+
+        // Show/hide URL input based on selection
+        const toggleUrlInput = () => {
+            if (customBareMuxDropdown.value === "custom") {
+                bareMuxUrlContainer.classList.remove("hidden");
+            } else {
+                bareMuxUrlContainer.classList.add("hidden");
+            }
+        };
+        toggleUrlInput();
+
+        customBareMuxDropdown.addEventListener("change", () => {
+            toggleUrlInput();
+            opts.storageManager.setVal("useCustomBareMux", customBareMuxDropdown.value);
+        });
+
+        const reset = (hide: boolean = true) => {
+            if (hide) bareMuxServerInfo.classList.add("hidden");
+            bareMuxServerInfoInner.innerText = "Checking URL...";
+            bareMuxServerInfoInner.classList.remove("text-red-500");
+            bareMuxServerInfoInner.classList.remove("text-green-500");
+        };
+
+        bareMuxServerSave.addEventListener("click", async () => {
+            const server = bareMuxServerSwitcher.value;
+            
+            if (customBareMuxDropdown.value === "custom") {
+                bareMuxServerInfo.classList.remove("hidden");
+
+                // Validate URL more robustly
+                try {
+                    const url = new URL(server);
+                    // Only allow http and https protocols
+                    if (url.protocol !== "http:" && url.protocol !== "https:") {
+                        throw new Error("Invalid protocol");
+                    }
+                    // URL is valid
+                    reset(false);
+                    bareMuxServerInfoInner.innerText = "Bare-Mux Server Set!";
+                    bareMuxServerInfoInner.classList.add("text-green-500");
+                    opts.storageManager.setVal("customBareMuxUrl", server);
+                    opts.storageManager.setVal("useCustomBareMux", "custom");
+                    // Reload to apply changes
+                    setTimeout(() => location.reload(), RELOAD_DELAY_MS);
+                } catch (e) {
+                    reset(false);
+                    bareMuxServerInfoInner.innerText = "Invalid URL format. Use http:// or https://";
+                    bareMuxServerInfoInner.classList.add("text-red-500");
+                }
+            } else {
+                reset(false);
+                bareMuxServerInfo.classList.remove("hidden");
+                bareMuxServerInfoInner.innerText = "Using local Bare-Mux server";
+                bareMuxServerInfoInner.classList.add("text-green-500");
+                opts.storageManager.setVal("useCustomBareMux", "local");
+                // Reload to apply changes
+                setTimeout(() => location.reload(), RELOAD_DELAY_MS);
+            }
+
+            setTimeout(() => reset(), MESSAGE_HIDE_DELAY_MS);
+        });
+
+        bareMuxServerReset.addEventListener("click", async () => {
+            bareMuxServerInfo.classList.remove("hidden");
+            bareMuxServerInfoInner.innerText = "Bare-Mux Server Reset to Local!";
+            bareMuxServerInfoInner.classList.add("text-green-500");
+            opts.storageManager.setVal("useCustomBareMux", "local");
+            opts.storageManager.setVal("customBareMuxUrl", "");
+            customBareMuxDropdown.value = "local";
+            bareMuxServerSwitcher.value = "";
+            toggleUrlInput();
+            setTimeout(() => reset(), MESSAGE_HIDE_DELAY_MS);
+            // Reload to apply changes
+            setTimeout(() => location.reload(), RELOAD_DELAY_MS);
         });
     }
 
@@ -195,6 +314,7 @@ Object.keys(SearchEngines).forEach((k) =>
             await searchEngine({settings, sw, storageManager});
             await tabReordering({settings, sw, storageManager}); // NEW
             await wispServer({settings, sw, storageManager});
+            await bareMuxServer({settings, sw, storageManager}); // NEW
         } catch (err) {
             //console.log(err);
         }

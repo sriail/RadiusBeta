@@ -119,7 +119,36 @@ class SW {
         createScript("/marcs/scramjet.all.js", true);
 
         checkScripts().then(async () => {
-            this.#baremuxConn = new BareMuxConnection("/erab/worker.js");
+            // Check if custom bare-mux server is configured
+            const useCustomBareMux = this.#storageManager.getVal("useCustomBareMux");
+            const customBareMuxUrl = this.#storageManager.getVal("customBareMuxUrl");
+
+            let bareMuxWorkerUrl = "/erab/worker.js";
+
+            // If using custom bare-mux, use the remote worker
+            if (useCustomBareMux === "custom" && customBareMuxUrl) {
+                try {
+                    // Construct the worker URL from the custom bare-mux server
+                    const url = new URL(customBareMuxUrl);
+                    // Only allow http and https protocols for security
+                    if (url.protocol === "http:" || url.protocol === "https:") {
+                        bareMuxWorkerUrl = new URL("worker.js", customBareMuxUrl).toString();
+                        console.log(`Using custom Bare-Mux server: ${bareMuxWorkerUrl}`);
+                    } else {
+                        console.error(
+                            "Invalid protocol for Bare-Mux server. Only http:// and https:// are allowed."
+                        );
+                        console.log("Falling back to local Bare-Mux server");
+                    }
+                } catch (error) {
+                    console.error("Invalid Bare-Mux server URL:", error);
+                    console.log("Falling back to local Bare-Mux server");
+                }
+            } else {
+                console.log("Using local Bare-Mux server");
+            }
+
+            this.#baremuxConn = new BareMuxConnection(bareMuxWorkerUrl);
             await this.setTransport();
             this.#scramjetController = new ScramjetController({
                 prefix: "/~/scramjet/",

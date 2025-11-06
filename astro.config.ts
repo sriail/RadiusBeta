@@ -1,6 +1,6 @@
 import { defineConfig } from "astro/config";
 import type { Plugin } from "vite";
-import wisp from "wisp-server-node";
+import { server as wisp } from "@mercuryworkshop/wisp-js/server";
 import node from "@astrojs/node";
 import tailwindcss from "@tailwindcss/vite";
 import icon from "astro-icon";
