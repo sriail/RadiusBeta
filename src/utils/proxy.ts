@@ -127,10 +127,23 @@ class SW {
 
             // If using custom bare-mux, use the remote worker
             if (useCustomBareMux === "custom" && customBareMuxUrl) {
-                // Construct the worker URL from the custom bare-mux server
-                const url = new URL(customBareMuxUrl);
-                bareMuxWorkerUrl = `${url.origin}${url.pathname}${url.pathname.endsWith("/") ? "" : "/"}worker.js`;
-                console.log(`Using custom Bare-Mux server: ${bareMuxWorkerUrl}`);
+                try {
+                    // Construct the worker URL from the custom bare-mux server
+                    const url = new URL(customBareMuxUrl);
+                    // Only allow http and https protocols for security
+                    if (url.protocol === "http:" || url.protocol === "https:") {
+                        bareMuxWorkerUrl = `${url.origin}${url.pathname}${url.pathname.endsWith("/") ? "" : "/"}worker.js`;
+                        console.log(`Using custom Bare-Mux server: ${bareMuxWorkerUrl}`);
+                    } else {
+                        console.error(
+                            "Invalid protocol for Bare-Mux server. Only http:// and https:// are allowed."
+                        );
+                        console.log("Falling back to local Bare-Mux server");
+                    }
+                } catch (error) {
+                    console.error("Invalid Bare-Mux server URL:", error);
+                    console.log("Falling back to local Bare-Mux server");
+                }
             } else {
                 console.log("Using local Bare-Mux server");
             }

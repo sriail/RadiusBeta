@@ -252,11 +252,14 @@ Object.keys(SearchEngines).forEach((k) =>
             if (customBareMuxDropdown.value === "custom") {
                 bareMuxServerInfo.classList.remove("hidden");
 
-                if (!server || !server.match(/^https?:\/\/.*/)) {
-                    reset(false);
-                    bareMuxServerInfoInner.innerText = "Invalid URL! URL must start with http:// or https://";
-                    bareMuxServerInfoInner.classList.add("text-red-500");
-                } else {
+                // Validate URL more robustly
+                try {
+                    const url = new URL(server);
+                    // Only allow http and https protocols
+                    if (url.protocol !== "http:" && url.protocol !== "https:") {
+                        throw new Error("Invalid protocol");
+                    }
+                    // URL is valid
                     reset(false);
                     bareMuxServerInfoInner.innerText = "Bare-Mux Server Set!";
                     bareMuxServerInfoInner.classList.add("text-green-500");
@@ -264,6 +267,10 @@ Object.keys(SearchEngines).forEach((k) =>
                     opts.storageManager.setVal("useCustomBareMux", "custom");
                     // Reload to apply changes
                     setTimeout(() => location.reload(), 1500);
+                } catch (e) {
+                    reset(false);
+                    bareMuxServerInfoInner.innerText = "Invalid URL! URL must start with http:// or https:// and be properly formatted";
+                    bareMuxServerInfoInner.classList.add("text-red-500");
                 }
             } else {
                 reset(false);
