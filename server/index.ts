@@ -46,7 +46,7 @@ await app.register(fastifyMiddie);
 await app.use(astroHandler);
 
 app.setNotFoundHandler((req, res) => {
-    res.redirect('/404'); // This is hacky as hell
+    res.redirect("/404"); // This is hacky as hell
 });
 
 const port = parseInt(process.env.PORT as string) || parseInt("8080");
