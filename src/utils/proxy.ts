@@ -75,14 +75,17 @@ class SW {
         switch (transport) {
             case "epoxy": {
                 await this.#baremuxConn!.setTransport("/epoxy/index.mjs", [{ wisp: wispServer() }]);
+                break;
             }
             case "libcurl": {
                 await this.#baremuxConn!.setTransport("/libcurl/index.mjs", [
                     { wisp: wispServer() }
                 ]);
+                break;
             }
             default: {
                 await this.#baremuxConn!.setTransport("/epoxy/index.mjs", [{ wisp: wispServer() }]);
+                break;
             }
         }
     }
